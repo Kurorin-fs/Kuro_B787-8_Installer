@@ -130,6 +130,7 @@ print("Community Path = " + Community)
 os.chdir(Community)
 HDpathS = os.path.join(Community, 'B78XH\html_ui\Pages\VCockpit\Instruments\Airliners\B787_10\FMC')
 HDpathD = os.path.join(Community, 'B78XH-main\html_ui\Pages\VCockpit\Instruments\Airliners\B787_10\FMC')
+HDpathD2 = os.path.join(Community, 'B78XH-dev\html_ui\Pages\VCockpit\Instruments\Airliners\B787_10\FMC')
 HDpathE = os.path.join(Community, 'B78XH-experimental\html_ui\Pages\VCockpit\Instruments\Airliners\B787_10\FMC')
 
 #check if HD78XH exists
@@ -138,6 +139,9 @@ if os.path.exists(HDpathS):
     print("HD78XH(Stable) found")
 elif os.path.exists(HDpathD):
     HDPath = HDpathD
+    print("HD78XH(Development) found")
+elif os.path.exists(HDpathD2):
+    HDPath = HDpathD2
     print("HD78XH(Development) found")
 elif os.path.exists(HDpathE):
     HDPath = HDpathE
@@ -171,7 +175,7 @@ def Copy788():
 KuroPath = os.path.join(Community, 'Kuro_B787-8')
 if os.path.exists(KuroPath):
     print("Kuro_B787-8 found in Community folder")
-    if messagebox.askyesno("Kuro_B787-8 Installer", "Kuro_B787-8 found in Community folder.\nDo you want to replace the current one?\n\nSelect Yes to re-install.\nSelect No to only update the instrument files from B78XH."):
+    if messagebox.askyesno("Kuro_B787-8 Installer", "Kuro_B787-8 found in Community folder.\nDo you want to replace the current one?\n\nSelect Yes to perform clean install B787-8.\nSelect No to only update the instrument files from your B78XH."):
         #check if zip exist
         if not os.path.exists(zippath):
             print("main.zip not found. Download and Extract the installer again.")
