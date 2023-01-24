@@ -87,7 +87,7 @@ root.tk.call('wm', 'iconphoto', root._w, tk.PhotoImage(data=data))
 
 #Intro
 print("\nThis program is the installer/updater of Kuro_B787-8 for Microsoft Flight Simulator.    Creator:Kurorin(@kuro_x#4595)\nRequired Contents : MSFS Premium Delux Version, HeavyDivision's B78XH(any version)")
-if not messagebox.askokcancel("Kuro_B787-8 Installer v1.0.4", "This program is the installer/updater of Kuro_B787-8 for Microsoft Flight Simulator.\n\nRequired Contents :\nMSFS Premium Delux Version,\nHeavyDivision's B78XH(any version)\n\nCreator : Kurorin(@kuro_x#4595)\nhttps://flightsim.to/profile/Kurorin\n\nPress OK to Continue"):
+if not messagebox.askokcancel("Kuro_B787-8 Installer v1.0.5", "This program is the installer/updater of Kuro_B787-8 for Microsoft Flight Simulator.\n\nRequired Contents :\nMSFS Premium Delux Version,\nHeavyDivision's B78XH(any version)\n\nCreator : Kurorin(@kuro_x#4595)\nhttps://flightsim.to/profile/Kurorin\n\nPress OK to Continue"):
     messagebox.showerror("Kuro_B787-8 Installer - Installation Canceled", "Installation Canceled")
     sys.exit()
 
