@@ -87,12 +87,13 @@ root.tk.call('wm', 'iconphoto', root._w, tk.PhotoImage(data=data))
 
 #Intro
 print("\nThis program is the installer/updater of Kuro_B787-8 for Microsoft Flight Simulator.    Creator:Kurorin(@kuro_x#4595)\nRequired Contents : MSFS Premium Delux Version, HeavyDivision's B78XH(any version)")
-if not messagebox.askokcancel("Kuro_B787-8 Installer v1.0.5", "This program is the installer/updater of Kuro_B787-8 for Microsoft Flight Simulator.\n\nRequired Contents :\nMSFS Premium Delux Version,\nHeavyDivision's B78XH(any version)\n\nCreator : Kurorin(@kuro_x#4595)\nhttps://flightsim.to/profile/Kurorin\n\nPress OK to Continue"):
+if not messagebox.askokcancel("Kuro_B787-8 Installer v1.0.6", "This program is the installer/updater of Kuro_B787-8 for Microsoft Flight Simulator.\n\nRequired Contents :\nMSFS Premium Delux Version,\nHeavyDivision's B78XH(any version)\n\nCreator : Kurorin(@kuro_x#4595)\nhttps://flightsim.to/profile/Kurorin\n\nPress OK to Continue"):
     messagebox.showerror("Kuro_B787-8 Installer - Installation Canceled", "Installation Canceled")
     sys.exit()
 
 #zip Path
 zippath = os.path.join(os.getcwd(), 'main.zip')
+patchpath = os.path.join(os.getcwd(), 'xml.zip')
 
 #lines open Usercfg.opt
 def OpenOpt():
@@ -119,6 +120,10 @@ elif os.path.exists(os.path.join(USERCFGpathS, 'usercfg.opt')):
 else:
     MSFSpath = os.environ['USERPROFILE']
 
+#message
+print("Select your MSFS Community folder in the next pop-up")
+messagebox.showinfo("Kuro_B787-8 Installer", "Select your MSFS Community folder in the next pop-up")
+
 #ask users where Community is
 Community = filedialog.askdirectory(initialdir = MSFSpath, title='Kuro_B787-8 Installer - Select Community Folder') 
 if Community == "":
@@ -136,15 +141,19 @@ HDpathE = os.path.join(Community, 'B78XH-experimental\html_ui\Pages\VCockpit\Ins
 #check if HD78XH exists
 if os.path.exists(HDpathS):
     HDPath = HDpathS
+    HDname = "B78XH"
     print("HD78XH(Stable) found")
 elif os.path.exists(HDpathD):
     HDPath = HDpathD
+    HDname = "B78XH-main"
     print("HD78XH(Development) found")
 elif os.path.exists(HDpathD2):
     HDPath = HDpathD2
+    HDname = "B78XH-dev"
     print("HD78XH(Development) found")
 elif os.path.exists(HDpathE):
     HDPath = HDpathE
+    HDname = "B78XH-experimental"
     print("HD78XH(Experimental) found")
 else:
     print("HeavyDivision's B78XH not found. Install it and try again.")
@@ -163,7 +172,8 @@ else:
     print("Asobo B78X found in Official folder")
 '''
 
-#extract and copy 787-8
+
+#def - extract and copy 787-8
 def Copy788():
     print("Copying Kuro_B787-8 to Community")
     zip_f = zipfile.ZipFile(zippath, "r")
@@ -198,7 +208,33 @@ else:
     Copy788()
 
 
-#copy HD78XH's FMC file
+#def - extract and copy older xml - v1.0.6
+def PatchXML():
+    print("Patching xml files for older B78XH")
+    patch_f = zipfile.ZipFile(patchpath, "r")
+    patch_f.extractall(Community)
+    patch_f.close()
+    print("Patched xml files for older B78XH")
+
+#check if not HD78XH is compatible with the new engine anim - v1.0.6
+EngPath = os.path.join(Community, os.path.join(HDname, 'ModelBehaviorDefs\Heavy\Engines'))
+if not os.path.exists(EngPath):
+    if not os.path.exists(patchpath):
+        print("xml.zip not found. Download and Extract the installer again.")
+        messagebox.showerror("Kuro_B787-8 Installer - Installation Failed", "xml.zip not found.\n\nDownload and Extract the installer again.")
+        sys.exit()
+    else:
+        print("Use old engines animation")
+        PatchXML()
+
+
+#copy HD78XH's engines.cfg file
+os.chdir(os.path.join(Community, os.path.join(HDname, 'SimObjects\Airplanes\Asobo_B787_10')))
+eng7878 = os.path.join(Community, 'Kuro_B787-8\SimObjects\Airplanes\Kuro_B787_8')
+shutil.copyfile('engines.cfg', eng7878 + '\engines.cfg')
+print("Copied HD engines.cfg to Kuro_B787-8")
+
+#copy HD78XH's FMC files
 os.chdir(HDPath)
 fmcpath7878 = os.path.join(Community, 'Kuro_B787-8\html_ui\Pages\VCockpit\Instruments\Airliners\B787_10\FMC')
 shutil.copyfile('B787_10_FMC.html', fmcpath7878 + '\B787_8_FMC.html')
