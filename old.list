@@ -1,0 +1,18 @@
+['787-10', 'GEnx-1B76']
+Only flaps 5, 10, 15, 17, 18, 20 can be set for takeoff
+[5, 10, 15, 17, 18, 20]
+let flapAngles = [0, 1, 5, 10, 15, 17, 18, 20, 25, 30];
+let crzCGCell = '20.0%';
+            SimVar.SetSimVarValue('PAYLOAD STATION WEIGHT:1', 'Pounds', 200);
+            SimVar.SetSimVarValue('PAYLOAD STATION WEIGHT:2', 'Pounds', 200);
+return this.fmc.setZeroFuelWeight((298700 + B787_10_FMC_PayloadManagerPage.requestedPayload) / 1000, EmptyCallback.Void, true);
+                    'FORWARD_BAGGAGE': this.getPayloadValue(B787_10_FMC_PayloadManagerPage.payloadIndex.FORWARD_BAGGAGE)
+            SimVar.SetSimVarValue('PAYLOAD STATION WEIGHT:7', 'Pounds', 0);
+                    'COPILOT': this.getPayloadValue(B787_10_FMC_PayloadManagerPage.payloadIndex.COPILOT)
+                    'BUSINESS_CLASS': this.getPayloadValue(B787_10_FMC_PayloadManagerPage.payloadIndex.BUSINESS_CLASS),
+                    'REAR_BAGGAGE': this.getPayloadValue(B787_10_FMC_PayloadManagerPage.payloadIndex.REAR_BAGGAGE)
+            await this.setPayloadValue(7, 0);
+                actualValue = this.getPayloadValueFromCache(B787_10_FMC_PayloadManagerPage.payloadIndex.BUSINESS_CLASS);\n                await this.setPayloadValue(B787_10_FMC_PayloadManagerPage.payloadIndex.BUSINESS_CLASS, amount + actualValue);
+                actualValue = this.getPayloadValueFromCache(B787_10_FMC_PayloadManagerPage.payloadIndex.REAR_BAGGAGE);\n                await this.setPayloadValue(B787_10_FMC_PayloadManagerPage.payloadIndex.REAR_BAGGAGE, amount + actualValue);
+                'BUSINESS_CLASS': 3,\n                'PREMIUM_ECONOMY': 4,\n                'ECONOMY_CLASS': 5,\n                'FORWARD_BAGGAGE': 6,\n                'REAR_BAGGAGE': 7
+            return 560001;

@@ -5,6 +5,7 @@ import zipfile
 import shutil
 import sys
 import tkinter as tk
+import re
 
 #icon
 root = tk.Tk()
@@ -84,16 +85,37 @@ i7RYi7ZIFAEBADs=
      ''' 
 root.tk.call('wm', 'iconphoto', root._w, tk.PhotoImage(data=data))
 
-
-#Intro
-print("\nThis program is the installer/updater of Kuro_B787-8 for Microsoft Flight Simulator.    Creator:Kurorin(@kuro_x#4595)\nRequired Contents : MSFS Premium Delux Version, HeavyDivision's B78XH(any version)")
-if not messagebox.askokcancel("Kuro_B787-8 Installer v1.0.6", "This program is the installer/updater of Kuro_B787-8 for Microsoft Flight Simulator.\n\nRequired Contents :\nMSFS Premium Delux Version,\nHeavyDivision's B78XH(any version)\n\nCreator : Kurorin(@kuro_x#4595)\nhttps://flightsim.to/profile/Kurorin\n\nPress OK to Continue"):
-    messagebox.showerror("Kuro_B787-8 Installer - Installation Canceled", "Installation Canceled")
-    sys.exit()
-
 #zip Path
 zippath = os.path.join(os.getcwd(), 'main.zip')
 patchpath = os.path.join(os.getcwd(), 'xml.zip')
+
+#check if lists exist
+oldlistpath = os.path.join(os.getcwd(), 'old.list')
+newlistpath = os.path.join(os.getcwd(), 'new.list')
+if not os.path.exists(oldlistpath) or not os.path.exists(newlistpath):
+    print("Required Installer Components(old.list or new.list) not found. Download and Extract the installer again.")
+    messagebox.showerror("Kuro_B787-8 Installer - Installation Failed", "Required Installer Components(old.list or new.list) not found. \n\nDownload and Extract the installer again.")
+    sys.exit()
+
+#read list
+oldlist = "old.list"
+newlist = "new.list"
+with open(oldlist, "r", encoding="utf-8") as oldlistT:
+	oldjs = oldlistT.read().splitlines()
+with open(newlist, "r", encoding="utf-8") as newlistT:
+	newjs = newlistT.read ().splitlines()
+oldjs = [item.replace('\\n', '\n') for item in oldjs]
+newjs = [item.replace('\\n', '\n') for item in newjs]
+
+#Intro
+print("\nThis program is the installer/updater of Kuro_B787-8 for Microsoft Flight Simulator.    Creator:Kurorin(@kuro_x#4595)\nRequired Contents : MSFS Premium Delux Version, HeavyDivision's B78XH(any version)")
+if not messagebox.askokcancel("Kuro_B787-8 Installer v1.1.0", "This program is the installer/updater of Kuro_B787-8 for Microsoft Flight Simulator.\n\nRequired Contents :\nMSFS Premium Delux Version,\nHeavyDivision's B78XH(any version)\n\nCreator : Kurorin(@kuro_x#4595)\nhttps://flightsim.to/profile/Kurorin\n\nPress OK to Continue"):
+    messagebox.showerror("Kuro_B787-8 Installer - Installation Canceled", "Installation Canceled")
+    sys.exit()
+
+#message
+print("Select your MSFS Community folder in the next pop-up")
+messagebox.showinfo("Kuro_B787-8 Installer", "Select your MSFS Community folder in the next pop-up")
 
 #lines open Usercfg.opt
 def OpenOpt():
@@ -120,12 +142,8 @@ elif os.path.exists(os.path.join(USERCFGpathS, 'usercfg.opt')):
 else:
     MSFSpath = os.environ['USERPROFILE']
 
-#message
-print("Select your MSFS Community folder in the next pop-up")
-messagebox.showinfo("Kuro_B787-8 Installer", "Select your MSFS Community folder in the next pop-up")
-
 #ask users where Community is
-Community = filedialog.askdirectory(initialdir = MSFSpath, title='Kuro_B787-8 Installer - Select Community Folder') 
+Community = filedialog.askdirectory(initialdir = MSFSpath, title='Kuro_B787-8 Installer - >>>Select Community Folder<<<') 
 if Community == "":
     messagebox.showerror("Kuro_B787-8 Installer - Installation Canceled", "Installation Canceled")
     sys.exit()
@@ -185,11 +203,11 @@ def Copy788():
 KuroPath = os.path.join(Community, 'Kuro_B787-8')
 if os.path.exists(KuroPath):
     print("Kuro_B787-8 found in Community folder")
-    if messagebox.askyesno("Kuro_B787-8 Installer", "Kuro_B787-8 found in Community folder.\nDo you want to replace the current one?\n\nSelect Yes to perform clean install B787-8.\nSelect No to only update the instrument files from your B78XH."):
+    if messagebox.askyesno("Kuro_B787-8 Installer", "Kuro_B787-8 found in Community folder.\nDo you want to replace the current one?\n\nSelect Yes to perform clean (re)install B787-8.\nSelect No to only update the instrument files (from your (newer) B78XH.)"):
         #check if zip exist
         if not os.path.exists(zippath):
-            print("main.zip not found. Download and Extract the installer again.")
-            messagebox.showerror("Kuro_B787-8 Installer - Installation Failed", "main.zip not found.\n\nDownload and Extract the installer again.")
+            print("Required Installer Component(main.zip) not found. Download and Extract the installer again.")
+            messagebox.showerror("Kuro_B787-8 Installer - Installation Failed", "Required Installer Component(main.zip) not found.\n(The file is required to install)\n\nDownload and Extract the installer again.")
             sys.exit()
         else:
             #delete 787-8
@@ -200,8 +218,8 @@ if os.path.exists(KuroPath):
             Copy788()
 #check if zip exists
 elif not os.path.exists(zippath):
-    print("main.zip not found. Download and Extract the installer again.")
-    messagebox.showerror("Kuro_B787-8 Installer - Installation Failed", "main.zip not found.\n\nDownload and Extract the installer again.")
+    print("Required Installer Component(main.zip) not found. Download and Extract the installer again.")
+    messagebox.showerror("Kuro_B787-8 Installer - Installation Failed", "Required Installer Component(main.zip) not found. \n\nDownload and Extract the installer again.")
     sys.exit()
 else:
     #copy 787-8
@@ -220,19 +238,20 @@ def PatchXML():
 EngPath = os.path.join(Community, os.path.join(HDname, 'ModelBehaviorDefs\Heavy\Engines'))
 if not os.path.exists(EngPath):
     if not os.path.exists(patchpath):
-        print("xml.zip not found. Download and Extract the installer again.")
+        print("Required Installer Component(xml.zip) not found. Download and Extract the installer again.")
         messagebox.showerror("Kuro_B787-8 Installer - Installation Failed", "xml.zip not found.\n\nDownload and Extract the installer again.")
         sys.exit()
     else:
         print("Use old engines animation")
         PatchXML()
 
-
+'''v1.1.0-
 #copy HD78XH's engines.cfg file
 os.chdir(os.path.join(Community, os.path.join(HDname, 'SimObjects\Airplanes\Asobo_B787_10')))
 eng7878 = os.path.join(Community, 'Kuro_B787-8\SimObjects\Airplanes\Kuro_B787_8')
 shutil.copyfile('engines.cfg', eng7878 + '\engines.cfg')
 print("Copied HD engines.cfg to Kuro_B787-8")
+'''
 
 #copy HD78XH's FMC files
 os.chdir(HDPath)
@@ -251,11 +270,13 @@ with open(FMC788html, encoding="UTF-8") as html:
 with open(FMC788html, mode="w", encoding="UTF-8") as html2:
     html2.write(htmlafter)
 
-
+'''v1.1.0-
 #rewrite HD78XH's FMC files(js)
 oldjs = ["['787-10', 'GEnx-1B76']", "Only flaps 5, 10, 15, 17, 18, 20 can be set for takeoff", "[5, 10, 15, 17, 18, 20]", "let flapAngles = [0, 1, 5, 10, 15, 17, 18, 20, 25, 30];"]
 newjs = ["['787-8', 'GEnx-1B70']", "Only flaps 5, 15, 20 can be set for takeoff", "[5, 15, 20]", "let flapAngles = [0, 1, 5, 15, 20, 25, 30];"]
+'''
 
+#rewrite HD78XH's FMC files(js)
 FMC788js = 'hdfmc8.js'
 with open(FMC788js, encoding="UTF-8") as js:
     jscontent = js.read()
@@ -265,8 +286,8 @@ with open(FMC788js, mode="w", encoding="UTF-8") as js2:
     js2.write(jscontent)
 
 
-print('Be sure to re-run this exe every time after updating B78XH. If not, the instruments will not work properly.')
-messagebox.showwarning("Kuro_B787-8 Installer", "re-run the batch file every time after updating B78XH.\nIf not, the instruments will not work properly.")
+print('Re-run the batch file each time after updating B78XH. If not, the instruments will not work properly.')
+messagebox.showwarning("Kuro_B787-8 Installer", "Re-run the batch file each time after updating B78XH.\nIf not, the instruments will not work properly.")
 print('Installation/Update has completed')
 messagebox.showinfo("Kuro_B787-8 Installer", "Installation/Update has completed.")
 sys.exit()
