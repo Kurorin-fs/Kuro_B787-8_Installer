@@ -6,6 +6,9 @@ import shutil
 import sys
 import tkinter as tk
 import re
+sys.path.append(os.path.dirname(__file__))
+sys.dont_write_bytecode = True
+import liveriesconvert
 
 #icon
 root = tk.Tk()
@@ -25,7 +28,7 @@ x07E7UrG6FXD5j7L7ETJ8UDM34+2ykHM5k3J60/K7FXJ5VvI3m7D3Ym+1njD3WrI
 3s7W3rLf7MDb6rre7bze59bY1cnb59rc2bjl8s7f7L/k8sji7OHc2tne4dze293g
 3N3i5ODi373r+Mfp67/r8tbl69Dn7M7o8svt9uDn8OXn5NHt6tvq8d3q69Pt+OXp
 7Ofp5uro7Nfu8u/q6d/u9ers6db1+e7w7d71+uX0++j19fHz8Oz0/Of2/fL0+PP2
-8uP6/+z5+vX49Pb59uj9/Pb7/vD9/fn7+P36///6+fr8+fL/+fP///X/+v/8+/7+
+8uP6/+z5+vX49Pb59uj9/Pb7/vD9/fn7+P36///6 +fr8+fL/+fP///X/+v/8+/7+
 9f/9//r///z/+/3//CwAAAAAgACAAAAI/gDdCRxIsKDBgwgTKlzIsKHDhxAjSpxI
 saLFixgzatzIsaPHjyBDihxJsqTJkyhTqlzJsqXLlzBjypxJs6bNmzhz6tzJs6fP
 n0CDCh1KtKjRo0iTKl3KtKnTp1CjSp1KtarVq1izat3KtavXr2DDih1LtqzZs2jT
@@ -88,6 +91,8 @@ root.tk.call('wm', 'iconphoto', root._w, tk.PhotoImage(data=data))
 #zip Path
 zippath = os.path.join(os.getcwd(), 'main.zip')
 patchpath = os.path.join(os.getcwd(), 'xml.zip')
+HDpatchpath = os.path.join(os.getcwd(), 'newHD.zip')
+cfgpath = os.path.join(os.getcwd(), "livery-cfgs")
 
 #check if lists exist
 oldlistpath = os.path.join(os.getcwd(), 'old.list')
@@ -151,26 +156,46 @@ print("Community Path = " + Community)
 
 #Find HD78XH
 os.chdir(Community)
-HDpathS = os.path.join(Community, 'B78XH\html_ui\Pages\VCockpit\Instruments\Airliners\B787_10\FMC')
-HDpathD = os.path.join(Community, 'B78XH-main\html_ui\Pages\VCockpit\Instruments\Airliners\B787_10\FMC')
-HDpathD2 = os.path.join(Community, 'B78XH-dev\html_ui\Pages\VCockpit\Instruments\Airliners\B787_10\FMC')
-HDpathE = os.path.join(Community, 'B78XH-experimental\html_ui\Pages\VCockpit\Instruments\Airliners\B787_10\FMC')
+HDpathS = os.path.join(Community, 'B78XH\html_ui\Pages\VCockpit\Instruments\Airliners')
+HDpathD = os.path.join(Community, 'B78XH-main\html_ui\Pages\VCockpit\Instruments\Airliners')
+HDpathD2 = os.path.join(Community, 'B78XH-dev\html_ui\Pages\VCockpit\Instruments\Airliners')
+HDpathE = os.path.join(Community, 'B78XH-experimental\html_ui\Pages\VCockpit\Instruments\Airliners')
 
-#check if HD78XH exists
+#check if HD78XH exists and HD78XH is separated new one -v1.1.0
 if os.path.exists(HDpathS):
-    HDPath = HDpathS
+    if os.path.exists(os.path.join(HDpathS, 'Heavy-Division-B78XH-mod\FMC')):
+        isHDB78XHnew = True
+        HDPath = os.path.join(HDpathS, 'Heavy-Division-B78XH-mod\FMC')
+    else:
+        HDPath = os.path.join(HDpathS, 'B787_10\FMC')
+        isHDB78XHnew = False
     HDname = "B78XH"
     print("HD78XH(Stable) found")
 elif os.path.exists(HDpathD):
-    HDPath = HDpathD
+    if os.path.exists(os.path.join(HDpathD, 'Heavy-Division-B78XH-mod\FMC')):
+        HDPath = os.path.join(HDpathD, 'Heavy-Division-B78XH-mod\FMC')
+        isHDB78XHnew = True
+    else:
+        HDPath = os.path.join(HDpathD, 'B787_10\FMC')
+        isHDB78XHnew = False
     HDname = "B78XH-main"
     print("HD78XH(Development) found")
 elif os.path.exists(HDpathD2):
-    HDPath = HDpathD2
+    if os.path.exists(os.path.join(HDpathD2, 'Heavy-Division-B78XH-mod\FMC')):
+        HDPath = os.path.join(HDpathD2, 'Heavy-Division-B78XH-mod\FMC')
+        isHDB78XHnew = True
+    else:
+        HDPath = os.path.join(HDpathD2, 'B787_10\FMC')
+        isHDB78XHnew = False
     HDname = "B78XH-dev"
     print("HD78XH(Development) found")
 elif os.path.exists(HDpathE):
-    HDPath = HDpathE
+    if os.path.exists(os.path.join(HDpathE, 'Heavy-Division-B78XH-mod\FMC')):
+        HDPath = os.path.join(HDpathE, 'Heavy-Division-B78XH-mod\FMC')
+        isHDB78XHnew = True
+    else:
+        HDPath = os.path.join(HDpathE, 'B787_10\FMC')
+        isHDB78XHnew = False
     HDname = "B78XH-experimental"
     print("HD78XH(Experimental) found")
 else:
@@ -226,13 +251,81 @@ else:
     Copy788()
 
 
+'''v1.1.0-
+#copy HD78XH's engines.cfg file
+os.chdir(os.path.join(Community, os.path.join(HDname, 'SimObjects\Airplanes\Asobo_B787_10')))
+eng7878 = os.path.join(Community, 'Kuro_B787-8\SimObjects\Airplanes\Kuro_B787_8')
+shutil.copyfile('engines.cfg', eng7878 + '\engines.cfg')
+print("Copied HD engines.cfg to Kuro_B787-8")
+'''
+
+#def - extract and copy new HD patch - v1.1.0
+def PatchnewHD():
+    print("Patching files for newer (separated) B78XH")
+    patch_f1 = zipfile.ZipFile(HDpatchpath, "r")
+    patch_f1.extractall(Community)
+    patch_f1.close()
+    print("Patched files for newer (separated) B78XH")
+
+#check if not HD78XH is newer (separated) one - v1.1.0
+if isHDB78XHnew:
+    if not os.path.exists(HDpatchpath):
+        print("non-separated HD78XH")
+        print("Required Installer Component(newHD.zip) not found. Download and Extract the installer again.")
+        messagebox.showerror("Kuro_B787-8 Installer - Installation Failed", "newHD.zip not found.\n\nDownload and Extract the installer again.")
+        sys.exit()
+    else:
+        print("separated HD78XH")
+        PatchnewHD()
+
+
+#copy HD78XH's FMC files -v1.1.0
+os.chdir(HDPath)
+if isHDB78XHnew:
+    fmcpath7878 = os.path.join(Community, 'Kuro_B787-8\html_ui\Pages\VCockpit\Instruments\Airliners\Heavy-Division-B78XH-mod\FMC')
+else:
+    fmcpath7878 = os.path.join(Community, 'Kuro_B787-8\html_ui\Pages\VCockpit\Instruments\Airliners\B787_10\FMC')
+shutil.copyfile('B787_10_FMC.html', fmcpath7878 + '\B787_8_FMC.html')
+shutil.copyfile('hdfmc.js', fmcpath7878 + '\hdfmc8.js')
+print("Copied HDfiles to Kuro_B787-8")
+
+
+#rewrite HD78XH's FMC files(html) -v1.1.0
+os.chdir(fmcpath7878)
+FMC788html = 'B787_8_FMC.html'
+with open(FMC788html, encoding="UTF-8") as html:
+    htmlcontent = html.read()
+    if isHDB78XHnew:
+        htmlafter = htmlcontent.replace('/Pages/VCockpit/Instruments/Airliners/Heavy-Division-B78XH-mod/FMC/hdfmc.js', '/Pages/VCockpit/Instruments/Airliners/Heavy-Division-B78XH-mod/FMC/hdfmc8.js')
+    else:
+        htmlafter = htmlcontent.replace('/Pages/VCockpit/Instruments/Airliners/B787_10/FMC/hdfmc.js', '/Pages/VCockpit/Instruments/Airliners/B787_10/FMC/hdfmc8.js')
+with open(FMC788html, mode="w", encoding="UTF-8") as html2:
+    html2.write(htmlafter)
+
+'''v1.1.0-
+#rewrite HD78XH's FMC files(js)
+oldjs = ["['787-10', 'GEnx-1B76']", "Only flaps 5, 10, 15, 17, 18, 20 can be set for takeoff", "[5, 10, 15, 17, 18, 20]", "let flapAngles = [0, 1, 5, 10, 15, 17, 18, 20, 25, 30];"]
+newjs = ["['787-8', 'GEnx-1B70']", "Only flaps 5, 15, 20 can be set for takeoff", "[5, 15, 20]", "let flapAngles = [0, 1, 5, 15, 20, 25, 30];"]
+'''
+
+#rewrite HD78XH's FMC files(js)
+os.chdir(fmcpath7878)
+FMC788js = 'hdfmc8.js'
+with open(FMC788js, encoding="UTF-8") as js:
+    jscontent = js.read()
+    for O, N in zip(oldjs, newjs):
+        jscontent= jscontent.replace(O, N)
+with open(FMC788js, mode="w", encoding="UTF-8") as js2:
+    js2.write(jscontent)
+
+
 #def - extract and copy older xml - v1.0.6
 def PatchXML():
-    print("Patching xml files for older B78XH")
+    print("Patching xml files for older B78XH engine")
     patch_f = zipfile.ZipFile(patchpath, "r")
     patch_f.extractall(Community)
     patch_f.close()
-    print("Patched xml files for older B78XH")
+    print("Patched xml files for older B78XH engine")
 
 #check if not HD78XH is compatible with the new engine anim - v1.0.6
 EngPath = os.path.join(Community, os.path.join(HDname, 'ModelBehaviorDefs\Heavy\Engines'))
@@ -245,45 +338,11 @@ if not os.path.exists(EngPath):
         print("Use old engines animation")
         PatchXML()
 
-'''v1.1.0-
-#copy HD78XH's engines.cfg file
-os.chdir(os.path.join(Community, os.path.join(HDname, 'SimObjects\Airplanes\Asobo_B787_10')))
-eng7878 = os.path.join(Community, 'Kuro_B787-8\SimObjects\Airplanes\Kuro_B787_8')
-shutil.copyfile('engines.cfg', eng7878 + '\engines.cfg')
-print("Copied HD engines.cfg to Kuro_B787-8")
-'''
-
-#copy HD78XH's FMC files
-os.chdir(HDPath)
-fmcpath7878 = os.path.join(Community, 'Kuro_B787-8\html_ui\Pages\VCockpit\Instruments\Airliners\B787_10\FMC')
-shutil.copyfile('B787_10_FMC.html', fmcpath7878 + '\B787_8_FMC.html')
-shutil.copyfile('hdfmc.js', fmcpath7878 + '\hdfmc8.js')
-print("Copied HDfiles to Kuro_B787-8")
-
-
-#rewrite HD78XH's FMC files(html)
-os.chdir(fmcpath7878)
-FMC788html = 'B787_8_FMC.html'
-with open(FMC788html, encoding="UTF-8") as html:
-    htmlcontent = html.read()
-    htmlafter = htmlcontent.replace('/Pages/VCockpit/Instruments/Airliners/B787_10/FMC/hdfmc.js', '/Pages/VCockpit/Instruments/Airliners/B787_10/FMC/hdfmc8.js')
-with open(FMC788html, mode="w", encoding="UTF-8") as html2:
-    html2.write(htmlafter)
-
-'''v1.1.0-
-#rewrite HD78XH's FMC files(js)
-oldjs = ["['787-10', 'GEnx-1B76']", "Only flaps 5, 10, 15, 17, 18, 20 can be set for takeoff", "[5, 10, 15, 17, 18, 20]", "let flapAngles = [0, 1, 5, 10, 15, 17, 18, 20, 25, 30];"]
-newjs = ["['787-8', 'GEnx-1B70']", "Only flaps 5, 15, 20 can be set for takeoff", "[5, 15, 20]", "let flapAngles = [0, 1, 5, 15, 20, 25, 30];"]
-'''
-
-#rewrite HD78XH's FMC files(js)
-FMC788js = 'hdfmc8.js'
-with open(FMC788js, encoding="UTF-8") as js:
-    jscontent = js.read()
-    for O, N in zip(oldjs, newjs):
-        jscontent= jscontent.replace(O, N)
-with open(FMC788js, mode="w", encoding="UTF-8") as js2:
-    js2.write(jscontent)
+#livery updater v1.1.0
+if isHDB78XHnew:
+    print("new")
+    if messagebox.askyesno("Kuro_B787-8 Installer", "The installer has detected that you are using the recently released B78XH, which is separated from the Default B787-10.\nThe previous B787-8 liveries are not compatible and cause fmc not to show up or CTD.\nDo you want to convert the liveries for B787-8 installed in your Community folder?\n(This operation cannot be undone.  Also, this feature is experimental.)"):
+        liveriesconvert.convert(Community, cfgpath)
 
 
 print('Re-run the batch file each time after updating B78XH. If not, the instruments will not work properly.')
