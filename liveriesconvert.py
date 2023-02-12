@@ -16,18 +16,16 @@ def convert(Community, cfgpath):
             s1 = f1.read()
             if 'Kuro_B787_8' in s1:
                 dirname1 = os.path.dirname(filename1)
+                print("Scanned : " + dirname1)
                 #model.cfg
                 for model1 in glob.glob(os.path.join(dirname1, 'model.*/model.cfg')):
                     shutil.copyfile(cfgpath + r'\model.cfg', model1)
-                    print("Converted : " + model1)
                 #texture.cfg
                 for tex1 in glob.glob(os.path.join(dirname1, 'texture.*/texture.cfg')):
                     shutil.copyfile(cfgpath + r'\texture.cfg', tex1)
-                    print("Converted : " + tex1)
                 #panel.cfg
                 for panel1 in glob.glob(os.path.join(dirname1, 'panel.*/panel.cfg')):
                     shutil.copyfile(cfgpath + r'\panel.cfg', panel1)
-                    print("Converted : " + panel1)
 
 
 #lines open Usercfg.opt
