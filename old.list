@@ -16,3 +16,9 @@ return this.fmc.setZeroFuelWeight((298700 + B787_10_FMC_PayloadManagerPage.reque
                 actualValue = this.getPayloadValueFromCache(B787_10_FMC_PayloadManagerPage.payloadIndex.REAR_BAGGAGE);\n                await this.setPayloadValue(B787_10_FMC_PayloadManagerPage.payloadIndex.REAR_BAGGAGE, amount + actualValue);
                 'BUSINESS_CLASS': 3,\n                'PREMIUM_ECONOMY': 4,\n                'ECONOMY_CLASS': 5,\n                'FORWARD_BAGGAGE': 6,\n                'REAR_BAGGAGE': 7
             return 560001;
+            return 100;\n        }\n        getThrustClimbLimit() {\n            let altitude = Simplane.getAltitude();\n            let temperature = SimVar.GetSimVarValue('AMBIENT TEMPERATURE', 'celsius');\n            return this.getClimbThrustN1(temperature, altitude) - this.getThrustCLBMode() * 8.6;
+            /*\n             let selectedAltitude = altitude;
+             */\n        }\n        controlDescentOld() {
+        tryExecuteBAL() {\n            /*
+             */\n        }\n        updateSideButtonActiveStatus() {
+             if (altitude < 20) {\n             this._stopPitchInterval50 = true;
