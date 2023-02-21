@@ -12,20 +12,21 @@ import glob
 def convert(Community, cfgpath):
     os.chdir(Community)
     for filename1 in glob.glob('**/aircraft.cfg', recursive=True):
-        with open(filename1) as f1:
-            s1 = f1.read()
-            if 'Kuro_B787_8' in s1:
-                dirname1 = os.path.dirname(filename1)
-                print("Scanned : " + dirname1)
-                #model.cfg
-                for model1 in glob.glob(os.path.join(dirname1, 'model.*/model.cfg')):
-                    shutil.copyfile(cfgpath + r'\model.cfg', model1)
-                #texture.cfg
-                for tex1 in glob.glob(os.path.join(dirname1, 'texture.*/texture.cfg')):
-                    shutil.copyfile(cfgpath + r'\texture.cfg', tex1)
-                #panel.cfg
-                for panel1 in glob.glob(os.path.join(dirname1, 'panel.*/panel.cfg')):
-                    shutil.copyfile(cfgpath + r'\panel.cfg', panel1)
+        f1 = open(filename1, mode="r", encoding="UTF-8")
+        s1 = f1.read()
+        f1.close()
+        if 'Kuro_B787_8' in s1:
+            dirname1 = os.path.dirname(filename1)
+            print("Scanned : " + dirname1)
+            #model.cfg
+            for model1 in glob.glob(os.path.join(dirname1, 'model.*/model.cfg')):
+                shutil.copyfile(cfgpath + r'\model.cfg', model1)
+            #texture.cfg
+            for tex1 in glob.glob(os.path.join(dirname1, 'texture.*/texture.cfg')):
+                shutil.copyfile(cfgpath + r'\texture.cfg', tex1)
+            #panel.cfg
+            for panel1 in glob.glob(os.path.join(dirname1, 'panel.*/panel.cfg')):
+                shutil.copyfile(cfgpath + r'\panel.cfg', panel1)
 
 
 #lines open Usercfg.opt
@@ -43,7 +44,6 @@ def OpenOpt():
 
 if __name__ == "__main__": 
     cfgpath = os.path.join(os.getcwd(), "livery-cfgs")
-    sample_func() 
     #MS Store Path
     USERCFGpathM = os.path.join((os.environ['USERPROFILE']), 'AppData\Local\Packages\Microsoft.FlightSimulator_8wekyb3d8bbwe\LocalCache')
     #Steam Path

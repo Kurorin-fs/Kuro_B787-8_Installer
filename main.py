@@ -1,5 +1,6 @@
 from tkinter import filedialog
 from tkinter import messagebox
+from tkinter import ttk
 import os
 import zipfile
 import shutil
@@ -10,6 +11,7 @@ sys.path.append(os.path.dirname(__file__))
 sys.dont_write_bytecode = True
 import liveriesconvert
 
+version = "v1.1.2"
 #icon
 root = tk.Tk()
 root.withdraw()
@@ -89,6 +91,7 @@ i7RYi7ZIFAEBADs=
 root.tk.call('wm', 'iconphoto', root._w, tk.PhotoImage(data=data))
 
 #zip Path
+pydir = os.getcwd()
 zippath = os.path.join(os.getcwd(), 'main.zip')
 patchpath = os.path.join(os.getcwd(), 'xml.zip')
 HDpatchpath = os.path.join(os.getcwd(), 'newHD.zip')
@@ -112,15 +115,76 @@ with open(newlist, "r", encoding="utf-8") as newlistT:
 oldjs = [item.replace('\\n', '\n') for item in oldjs]
 newjs = [item.replace('\\n', '\n') for item in newjs]
 
+#open config
+with open(os.path.join(pydir, 'installer.cfg'), mode='r', encoding='utf-8') as config:
+    configL = config.read().splitlines()
+    if configL:
+        Community = configL[0]
+    else:
+        Community = ""
+        intro()
+
 #Intro
-print("\nThis program is the installer/updater of Kuro_B787-8 for Microsoft Flight Simulator.    Creator:Kurorin(@kuro_x#4595)\nRequired Contents : MSFS Premium Delux Version, HeavyDivision's B78XH(any version)")
-if not messagebox.askokcancel("Kuro_B787-8 Installer v1.1.2", "This program is the installer/updater of Kuro_B787-8 for Microsoft Flight Simulator.\n\nRequired Contents :\nMSFS Premium Delux Version,\nHeavyDivision's B78XH(any version)\n\nCreator : Kurorin(@kuro_x#4595)\nhttps://flightsim.to/profile/Kurorin\n\nPress OK to Continue"):
-    messagebox.showerror("Kuro_B787-8 Installer - Installation Canceled", "Installation Canceled")
+def intro():
+    print("\nThis program is the installer/updater of Kuro_B787-8 for Microsoft Flight Simulator.    Creator:Kurorin(@kuro_x#4595)\nRequired Contents : MSFS Premium Delux Version, HeavyDivision's B78XH(any version)")
+    if not messagebox.askokcancel("Kuro_B787-8 Installer " + version, "This program is the installer/updater of Kuro_B787-8 for Microsoft Flight Simulator.\n\nRequired Contents :\nMSFS Premium Delux Version,\nHeavyDivision's B78XH(any version)\n\nCreator : Kurorin(@kuro_x#4595)\nhttps://flightsim.to/profile/Kurorin\n\nPress OK to Continue"):
+        messagebox.showerror("Kuro_B787-8 Installer - Installation Canceled", "Installation Canceled")
+        sys.exit()
+
+
+#menu
+def info():
+    messagebox.showinfo("Kuro_B787-8 Installer " + version, "This program is the installer/updater of Kuro_B787-8 for Microsoft Flight Simulator.\n\nRequired Contents :\nMSFS Premium Delux Version,\nHeavyDivision's B78XH(any version)\n\nCreator : Kurorin(@kuro_x#4595)\nhttps://flightsim.to/profile/Kurorin")
+def AskCom0():
+    AskCom()
+def settings():
+    sub_set = tk.Toplevel()
+    sub_set.geometry("300x100")
+    label_sub = tk.Label(sub_set, text="Communty Path :\n" + Community)
+    label_sub.place(relx = 0.5, rely = 0.2, relwidth = 0.9, anchor = tk.CENTER)
+    button = ttk.Button(sub_set, text="Select", command=AskCom0)
+    button.place(relx = 0.5, rely = 0.6, relwidth = 0.2, anchor = tk.CENTER)
+def install():
+    check788exist(Community, zippath)
+    PatchnewHD(isHDB78XHnew, HDpatchpath, Community)
+    engAnim(Community, HDname, patchpath)
+    fmcUpdate(HDPath, Community)
+    checklivery(isHDB78XHnew, Community, cfgpath)
+    endI()
+def update():
+    fmcUpdate(HDPath, Community)
+    endU()
+def livery():
+    checklivery(isHDB78XHnew, Community, cfgpath)
+def close():
     sys.exit()
 
-#message
-print("Select your MSFS Community folder in the next pop-up")
-messagebox.showinfo("Kuro_B787-8 Installer", "Select your MSFS Community folder in the next pop-up")
+root.title("Kuro_B787-8 Installer " + version)
+root.geometry("320x150")
+root.deiconify()
+men = tk.Menu(root) 
+root.config(menu=men)
+menu_file1 = tk.Menu(root, tearoff=0)
+menu_file2 = tk.Menu(root, tearoff=0)
+men.add_cascade(label='Settings', menu=menu_file1) 
+menu_file1.add_command(label='Settings', command=settings) 
+menu_file1.add_separator() 
+menu_file1.add_command(label='Close', command=close)
+men.add_cascade(label='Info', menu=menu_file2) 
+menu_file2.add_command(label='Info', command=info)
+button1 = ttk.Button(root, text="Install/Update B787-8", command=install)
+button1.place(relx = 0.5, rely = 0.2, relwidth = 0.8, anchor = tk.CENTER)
+button2 = ttk.Button(root, text="Update Only FMC files", command=update)
+button2.place(relx = 0.5, rely = 0.4, relwidth = 0.8, anchor = tk.CENTER)
+button3 = ttk.Button(root, text="Convert Livery", command=livery)
+button3.place(relx = 0.5, rely = 0.6, relwidth = 0.8, anchor = tk.CENTER)
+label1 = ttk.Label(root, text="Kurorin(@kuro_x#4595)")
+label1.place(relx = 0.5, rely = 0.8, anchor = tk.CENTER)
+
+
+
+
+
 
 #lines open Usercfg.opt
 def OpenOpt():
@@ -133,87 +197,94 @@ def OpenOpt():
     MSFSpath=MSFSpathH.strip('"')
     return MSFSpath
 
-#MS Store Path
-USERCFGpathM = os.path.join((os.environ['USERPROFILE']), 'AppData\Local\Packages\Microsoft.FlightSimulator_8wekyb3d8bbwe\LocalCache')
-#Steam Path
-USERCFGpathS = os.path.join((os.environ['USERPROFILE']), 'AppData\Roaming\Microsoft Flight Simulator')
+def AskCom():
+    #MS Store Path
+    USERCFGpathM = os.path.join((os.environ['USERPROFILE']), 'AppData\Local\Packages\Microsoft.FlightSimulator_8wekyb3d8bbwe\LocalCache')
+    #Steam Path
+    USERCFGpathS = os.path.join((os.environ['USERPROFILE']), 'AppData\Roaming\Microsoft Flight Simulator')
+    if os.path.exists(os.path.join(USERCFGpathM, 'usercfg.opt')):
+        os.chdir(USERCFGpathM)
+        MSFSpath = OpenOpt()
+    elif os.path.exists(os.path.join(USERCFGpathS, 'usercfg.opt')):
+        os.chdir(USERCFGpathS)
+        MSFSpath = OpenOpt()
+    else:
+        MSFSpath = os.environ['USERPROFILE']
+    #ask users where Community is
+    Community = filedialog.askdirectory(initialdir = MSFSpath, title='Kuro_B787-8 Installer - >>>Select Community Folder<<<') 
+    return Community
+def CheckCom(Community):
+    if Community == "":
+        messagebox.showerror("Kuro_B787-8 Installer - Installation Canceled", "Installation Canceled")
+        sys.exit()
+    print("Community Path = " + Community)
 
-if os.path.exists(os.path.join(USERCFGpathM, 'usercfg.opt')):
-    os.chdir(USERCFGpathM)
-    MSFSpath = OpenOpt()
-elif os.path.exists(os.path.join(USERCFGpathS, 'usercfg.opt')):
-    os.chdir(USERCFGpathS)
-    MSFSpath = OpenOpt()
-else:
-    MSFSpath = os.environ['USERPROFILE']
+#com written in cfg or not
+if Community == "": 
+    #message
+    print("Select your MSFS Community folder in the next pop-up")
+    messagebox.showinfo("Kuro_B787-8 Installer", "Select your MSFS Community folder in the next pop-up")
+    #write config
+    Community = AskCom()
+    CheckCom(Community)
+    with open(os.path.join(pydir, 'installer.cfg'), mode='w', encoding='utf-8') as config:
+        config.write(Community+"\n")
 
-#ask users where Community is
-Community = filedialog.askdirectory(initialdir = MSFSpath, title='Kuro_B787-8 Installer - >>>Select Community Folder<<<') 
-if Community == "":
-    messagebox.showerror("Kuro_B787-8 Installer - Installation Canceled", "Installation Canceled")
-    sys.exit()
-print("Community Path = " + Community)
 
 #Find HD78XH
-os.chdir(Community)
-HDpathS = os.path.join(Community, 'B78XH\html_ui\Pages\VCockpit\Instruments\Airliners')
-HDpathD = os.path.join(Community, 'B78XH-main\html_ui\Pages\VCockpit\Instruments\Airliners')
-HDpathD2 = os.path.join(Community, 'B78XH-dev\html_ui\Pages\VCockpit\Instruments\Airliners')
-HDpathE = os.path.join(Community, 'B78XH-experimental\html_ui\Pages\VCockpit\Instruments\Airliners')
+def setB78XH(Community):
+    os.chdir(Community)
+    HDpathS = os.path.join(Community, 'B78XH\html_ui\Pages\VCockpit\Instruments\Airliners')
+    HDpathD = os.path.join(Community, 'B78XH-main\html_ui\Pages\VCockpit\Instruments\Airliners')
+    HDpathD2 = os.path.join(Community, 'B78XH-dev\html_ui\Pages\VCockpit\Instruments\Airliners')
+    HDpathE = os.path.join(Community, 'B78XH-experimental\html_ui\Pages\VCockpit\Instruments\Airliners')
+    #check if HD78XH exists and HD78XH is separated new one -v1.1.0
+    if os.path.exists(HDpathS):
+        if os.path.exists(os.path.join(HDpathS, 'Heavy-Division-B78XH-mod\FMC')):
+            isHDB78XHnew = True
+            HDPath = os.path.join(HDpathS, 'Heavy-Division-B78XH-mod\FMC')
+        else:
+            HDPath = os.path.join(HDpathS, 'B787_10\FMC')
+            isHDB78XHnew = False
+        HDname = "B78XH"
+        print("HD78XH(Stable) found")
+    elif os.path.exists(HDpathD):
+        if os.path.exists(os.path.join(HDpathD, 'Heavy-Division-B78XH-mod\FMC')):
+            HDPath = os.path.join(HDpathD, 'Heavy-Division-B78XH-mod\FMC')
+            isHDB78XHnew = True
+        else:
+            HDPath = os.path.join(HDpathD, 'B787_10\FMC')
+            isHDB78XHnew = False
+        HDname = "B78XH-main"
+        print("HD78XH(Development) found")
+    elif os.path.exists(HDpathD2):
+        if os.path.exists(os.path.join(HDpathD2, 'Heavy-Division-B78XH-mod\FMC')):
+            HDPath = os.path.join(HDpathD2, 'Heavy-Division-B78XH-mod\FMC')
+            isHDB78XHnew = True
+        else:
+            HDPath = os.path.join(HDpathD2, 'B787_10\FMC')
+            isHDB78XHnew = False
+        HDname = "B78XH-dev"
+        print("HD78XH(Development) found")
+    elif os.path.exists(HDpathE):
+        if os.path.exists(os.path.join(HDpathE, 'Heavy-Division-B78XH-mod\FMC')):
+            HDPath = os.path.join(HDpathE, 'Heavy-Division-B78XH-mod\FMC')
+            isHDB78XHnew = True
+        else:
+            HDPath = os.path.join(HDpathE, 'B787_10\FMC')
+            isHDB78XHnew = False
+        HDname = "B78XH-experimental"
+        print("HD78XH(Experimental) found")
+    else:
+        print("HeavyDivision's B78XH not found. Install it and try again.")
+        messagebox.showerror("Kuro_B787-8 Installer - Installation Failed", "HeavyDivision's B78XH not found. Install it and try again.")
+        sys.exit()
+    return HDname, HDPath, isHDB78XHnew
+cB78XH = setB78XH(Community)
+HDname = cB78XH[0]
+HDPath = cB78XH[1]
+isHDB78XHnew = cB78XH[2]
 
-#check if HD78XH exists and HD78XH is separated new one -v1.1.0
-if os.path.exists(HDpathS):
-    if os.path.exists(os.path.join(HDpathS, 'Heavy-Division-B78XH-mod\FMC')):
-        isHDB78XHnew = True
-        HDPath = os.path.join(HDpathS, 'Heavy-Division-B78XH-mod\FMC')
-    else:
-        HDPath = os.path.join(HDpathS, 'B787_10\FMC')
-        isHDB78XHnew = False
-    HDname = "B78XH"
-    print("HD78XH(Stable) found")
-elif os.path.exists(HDpathD):
-    if os.path.exists(os.path.join(HDpathD, 'Heavy-Division-B78XH-mod\FMC')):
-        HDPath = os.path.join(HDpathD, 'Heavy-Division-B78XH-mod\FMC')
-        isHDB78XHnew = True
-    else:
-        HDPath = os.path.join(HDpathD, 'B787_10\FMC')
-        isHDB78XHnew = False
-    HDname = "B78XH-main"
-    print("HD78XH(Development) found")
-elif os.path.exists(HDpathD2):
-    if os.path.exists(os.path.join(HDpathD2, 'Heavy-Division-B78XH-mod\FMC')):
-        HDPath = os.path.join(HDpathD2, 'Heavy-Division-B78XH-mod\FMC')
-        isHDB78XHnew = True
-    else:
-        HDPath = os.path.join(HDpathD2, 'B787_10\FMC')
-        isHDB78XHnew = False
-    HDname = "B78XH-dev"
-    print("HD78XH(Development) found")
-elif os.path.exists(HDpathE):
-    if os.path.exists(os.path.join(HDpathE, 'Heavy-Division-B78XH-mod\FMC')):
-        HDPath = os.path.join(HDpathE, 'Heavy-Division-B78XH-mod\FMC')
-        isHDB78XHnew = True
-    else:
-        HDPath = os.path.join(HDpathE, 'B787_10\FMC')
-        isHDB78XHnew = False
-    HDname = "B78XH-experimental"
-    print("HD78XH(Experimental) found")
-else:
-    print("HeavyDivision's B78XH not found. Install it and try again.")
-    messagebox.showerror("Kuro_B787-8 Installer - Installation Failed", "HeavyDivision's B78XH not found. Install it and try again.")
-    sys.exit()
-
-'''#check if Asbo_B78X exists
-AS78XPath = os.path.join(os.path.dirname(Community), r'Official\OneStore\asobo-aircraft-b787-10')
-AS78XPathS = os.path.join(os.path.dirname(Community), r'Official\Steam\asobo-aircraft-b787-10')
-print(AS78XPath)
-if not os.path.exists(AS78XPath) and not os.path.exists(AS78XPathS):
-    print("Asobo B78X not found. You have to install Premium Delux Version of MSFS and the B787-10. After that, try again.")
-    messagebox.showerror("Kuro_B787-8 Installer - Installation Failed", "Asobo B78X not found\nYou have to install Premium Delux Version of MSFS and the B787-10.\nAfter that, try again.")
-    sys.exit()
-else:
-    print("Asobo B78X found in Official folder")
-'''
 
 
 #def - extract and copy 787-8
@@ -225,99 +296,84 @@ def Copy788():
     print("Copied Kuro_B787-8 to Community")
 
 #check if 787-8 exists
-KuroPath = os.path.join(Community, 'Kuro_B787-8')
-if os.path.exists(KuroPath):
-    print("Kuro_B787-8 found in Community folder")
-    if messagebox.askyesno("Kuro_B787-8 Installer", "Kuro_B787-8 found in Community folder.\nDo you want to replace the current one?\n\nSelect Yes to perform clean (re)install B787-8.\nSelect No to only update the instrument files (from your (newer) B78XH.)"):
-        #check if zip exist
-        if not os.path.exists(zippath):
-            print("Required Installer Component(main.zip) not found. Download and Extract the installer again.")
-            messagebox.showerror("Kuro_B787-8 Installer - Installation Failed", "Required Installer Component(main.zip) not found.\n(The file is required to install)\n\nDownload and Extract the installer again.")
-            sys.exit()
-        else:
-            #delete 787-8
-            print("Deleting Kuro_B787-8 in Community")
-            shutil.rmtree(KuroPath)
-            print("Deleted Kuro_B787-8 in Community")
-            #copy 787-8
-            Copy788()
-#check if zip exists
-elif not os.path.exists(zippath):
-    print("Required Installer Component(main.zip) not found. Download and Extract the installer again.")
-    messagebox.showerror("Kuro_B787-8 Installer - Installation Failed", "Required Installer Component(main.zip) not found. \n\nDownload and Extract the installer again.")
-    sys.exit()
-else:
-    #copy 787-8
-    Copy788()
-
-
-'''v1.1.0-
-#copy HD78XH's engines.cfg file
-os.chdir(os.path.join(Community, os.path.join(HDname, 'SimObjects\Airplanes\Asobo_B787_10')))
-eng7878 = os.path.join(Community, 'Kuro_B787-8\SimObjects\Airplanes\Kuro_B787_8')
-shutil.copyfile('engines.cfg', eng7878 + '\engines.cfg')
-print("Copied HD engines.cfg to Kuro_B787-8")
-'''
-
-#def - extract and copy new HD patch - v1.1.0
-def PatchnewHD():
-    print("Patching files for newer (separated) B78XH")
-    patch_f1 = zipfile.ZipFile(HDpatchpath, "r")
-    patch_f1.extractall(Community)
-    patch_f1.close()
-    print("Patched files for newer (separated) B78XH")
-
-#check if not HD78XH is newer (separated) one - v1.1.0
-if isHDB78XHnew:
-    if not os.path.exists(HDpatchpath):
-        print("non-separated HD78XH")
-        print("Required Installer Component(newHD.zip) not found. Download and Extract the installer again.")
-        messagebox.showerror("Kuro_B787-8 Installer - Installation Failed", "newHD.zip not found.\n\nDownload and Extract the installer again.")
+def check788exist(Community, zippath):
+    KuroPath = os.path.join(Community, 'Kuro_B787-8')
+    if os.path.exists(KuroPath):
+        print("Kuro_B787-8 found in Community folder")
+        if messagebox.askyesno("Kuro_B787-8 Installer", "Kuro_B787-8 found in Community folder.\nDo you want to replace the current one?\n\nSelect Yes to perform clean (re)install B787-8.\nSelect No to only update the instrument files (from your (newer) B78XH.)"):
+            #check if zip exist
+            if not os.path.exists(zippath):
+                print("Required Installer Component(main.zip) not found. Download and Extract the installer again.")
+                messagebox.showerror("Kuro_B787-8 Installer - Installation Failed", "Required Installer Component(main.zip) not found.\n(The file is required to install)\n\nDownload and Extract the installer again.")
+                sys.exit()
+            else:
+                #delete 787-8
+                print("Deleting Kuro_B787-8 in Community")
+                shutil.rmtree(KuroPath)
+                print("Deleted Kuro_B787-8 in Community")
+                #copy 787-8
+                Copy788()
+    #check if zip exists
+    elif not os.path.exists(zippath):
+        print("Required Installer Component(main.zip) not found. Download and Extract the installer again.")
+        messagebox.showerror("Kuro_B787-8 Installer - Installation Failed", "Required Installer Component(main.zip) not found. \n\nDownload and Extract the installer again.")
         sys.exit()
     else:
-        print("separated HD78XH")
-        PatchnewHD()
+        #copy 787-8
+        Copy788()
 
 
-#copy HD78XH's FMC files -v1.1.0
-os.chdir(HDPath)
-if isHDB78XHnew:
-    fmcpath7878 = os.path.join(Community, 'Kuro_B787-8\html_ui\Pages\VCockpit\Instruments\Airliners\Heavy-Division-B78XH-mod\FMC')
-else:
-    fmcpath7878 = os.path.join(Community, 'Kuro_B787-8\html_ui\Pages\VCockpit\Instruments\Airliners\B787_10\FMC')
-shutil.copyfile('B787_10_FMC.html', fmcpath7878 + '\B787_8_FMC.html')
-shutil.copyfile('hdfmc.js', fmcpath7878 + '\hdfmc8.js')
-print("Copied HDfiles to Kuro_B787-8")
 
 
-#rewrite HD78XH's FMC files(html) -v1.1.0
-os.chdir(fmcpath7878)
-FMC788html = 'B787_8_FMC.html'
-with open(FMC788html, encoding="UTF-8") as html:
-    htmlcontent = html.read()
+
+
+#check if not HD78XH is newer (separated) one - v1.1.0
+#def - extract and copy new HD patch - v1.1.0
+def PatchnewHD(isHDB78XHnew, HDpatchpath, Community):
     if isHDB78XHnew:
-        htmlafter = htmlcontent.replace('/Pages/VCockpit/Instruments/Airliners/Heavy-Division-B78XH-mod/FMC/hdfmc.js', '/Pages/VCockpit/Instruments/Airliners/Heavy-Division-B78XH-mod/FMC/hdfmc8.js')
+        if not os.path.exists(HDpatchpath):
+            print("non-separated HD78XH")
+            print("Required Installer Component(newHD.zip) not found. Download and Extract the installer again.")
+            messagebox.showerror("Kuro_B787-8 Installer - Installation Failed", "newHD.zip not found.\n\nDownload and Extract the installer again.")
+            sys.exit()
+        else:
+            print("separated HD78XH")
+            print("Patching files for newer (separated) B78XH")
+            patch_f1 = zipfile.ZipFile(HDpatchpath, "r")
+            patch_f1.extractall(Community)
+            patch_f1.close()
+            print("Patched files for newer (separated) B78XH")
+
+def fmcUpdate(HDPath, Community):
+    #copy HD78XH's FMC files -v1.1.0
+    os.chdir(HDPath)
+    if isHDB78XHnew:
+        fmcpath7878 = os.path.join(Community, 'Kuro_B787-8\html_ui\Pages\VCockpit\Instruments\Airliners\Heavy-Division-B78XH-mod\FMC')
     else:
-        htmlafter = htmlcontent.replace('/Pages/VCockpit/Instruments/Airliners/B787_10/FMC/hdfmc.js', '/Pages/VCockpit/Instruments/Airliners/B787_10/FMC/hdfmc8.js')
-with open(FMC788html, mode="w", encoding="UTF-8") as html2:
-    html2.write(htmlafter)
-
-'''v1.1.0-
-#rewrite HD78XH's FMC files(js)
-oldjs = ["['787-10', 'GEnx-1B76']", "Only flaps 5, 10, 15, 17, 18, 20 can be set for takeoff", "[5, 10, 15, 17, 18, 20]", "let flapAngles = [0, 1, 5, 10, 15, 17, 18, 20, 25, 30];"]
-newjs = ["['787-8', 'GEnx-1B70']", "Only flaps 5, 15, 20 can be set for takeoff", "[5, 15, 20]", "let flapAngles = [0, 1, 5, 15, 20, 25, 30];"]
-'''
-
-#rewrite HD78XH's FMC files(js)
-os.chdir(fmcpath7878)
-FMC788js = 'hdfmc8.js'
-with open(FMC788js, encoding="UTF-8") as js:
-    jscontent = js.read()
-    for O, N in zip(oldjs, newjs):
-        jscontent= jscontent.replace(O, N)
-with open(FMC788js, mode="w", encoding="UTF-8") as js2:
-    js2.write(jscontent)
-
+        fmcpath7878 = os.path.join(Community, 'Kuro_B787-8\html_ui\Pages\VCockpit\Instruments\Airliners\B787_10\FMC')
+    shutil.copyfile('B787_10_FMC.html', fmcpath7878 + '\B787_8_FMC.html')
+    shutil.copyfile('hdfmc.js', fmcpath7878 + '\hdfmc8.js')
+    print("Copied HDfiles to Kuro_B787-8")
+    #rewrite HD78XH's FMC files(html) -v1.1.0
+    os.chdir(fmcpath7878)
+    FMC788html = 'B787_8_FMC.html'
+    with open(FMC788html, encoding="UTF-8") as html:
+        htmlcontent = html.read()
+        if isHDB78XHnew:
+            htmlafter = htmlcontent.replace('/Pages/VCockpit/Instruments/Airliners/Heavy-Division-B78XH-mod/FMC/hdfmc.js', '/Pages/VCockpit/Instruments/Airliners/Heavy-Division-B78XH-mod/FMC/hdfmc8.js')
+        else:
+            htmlafter = htmlcontent.replace('/Pages/VCockpit/Instruments/Airliners/B787_10/FMC/hdfmc.js', '/Pages/VCockpit/Instruments/Airliners/B787_10/FMC/hdfmc8.js')
+    with open(FMC788html, mode="w", encoding="UTF-8") as html2:
+        html2.write(htmlafter)
+    #rewrite HD78XH's FMC files(js)
+    os.chdir(fmcpath7878)
+    FMC788js = 'hdfmc8.js'
+    with open(FMC788js, encoding="UTF-8") as js:
+        jscontent = js.read()
+        for O, N in zip(oldjs, newjs):
+            jscontent= jscontent.replace(O, N)
+    with open(FMC788js, mode="w", encoding="UTF-8") as js2:
+        js2.write(jscontent)
 
 #def - extract and copy older xml - v1.0.6
 def PatchXML():
@@ -328,25 +384,40 @@ def PatchXML():
     print("Patched xml files for older B78XH engine")
 
 #check if not HD78XH is compatible with the new engine anim - v1.0.6
-EngPath = os.path.join(Community, os.path.join(HDname, 'ModelBehaviorDefs\Heavy\Engines'))
-if not os.path.exists(EngPath):
-    if not os.path.exists(patchpath):
-        print("Required Installer Component(xml.zip) not found. Download and Extract the installer again.")
-        messagebox.showerror("Kuro_B787-8 Installer - Installation Failed", "xml.zip not found.\n\nDownload and Extract the installer again.")
-        sys.exit()
-    else:
-        print("Use old engines animation")
-        PatchXML()
+def engAnim(Community, HDname, patchpath):
+    EngPath = os.path.join(Community, os.path.join(HDname, 'ModelBehaviorDefs\Heavy\Engines'))
+    if not os.path.exists(EngPath):
+        if not os.path.exists(patchpath):
+            print("Required Installer Component(xml.zip) not found. Download and Extract the installer again.")
+            messagebox.showerror("Kuro_B787-8 Installer - Installation Failed", "xml.zip not found.\n\nDownload and Extract the installer again.")
+            sys.exit()
+        else:
+            print("Use old engines animation")
+            PatchXML()
 
 #livery updater v1.1.0
-if isHDB78XHnew:
-    print("new")
+def livery(Community, cfgpath):
     if messagebox.askyesno("Kuro_B787-8 Installer", "The installer has detected that you are using the recently released B78XH, which is separated from the Default B787-10.\nThe previous B787-8 liveries are not compatible and cause fmc not to show up or CTD.\nDo you want to convert the liveries for B787-8 installed in your Community folder?\n(This operation cannot be undone.  Also, this feature is experimental.)"):
         liveriesconvert.convert(Community, cfgpath)
 
+def checklivery(isHDB78XHnew, Community, cfgpath):
+    if isHDB78XHnew:
+        print("new")
+        livery(Community, cfgpath)
+    os.chdir(pydir)
 
-print('Re-run the batch file each time after updating B78XH. If not, the instruments will not work properly.')
-messagebox.showwarning("Kuro_B787-8 Installer", "Re-run the batch file each time after updating B78XH.\nIf not, the instruments will not work properly.")
-print('Installation/Update has completed')
-messagebox.showinfo("Kuro_B787-8 Installer", "Installation/Update has completed.")
-sys.exit()
+def endI():
+    print('Re-run the batch file each time after updating B78XH. If not, the instruments will not work properly.')
+    messagebox.showwarning("Kuro_B787-8 Installer", "Re-run the batch file each time after updating B78XH to update FMC files.\nIf not, the instruments will not work properly.")
+    print('Installation/Update has completed')
+    messagebox.showinfo("Kuro_B787-8 Installer", "Installation/Update has completed.")
+    os.chdir(pydir)
+def endF():
+    print('Re-run the batch file each time after updating B78XH. If not, the instruments will not work properly.')
+    messagebox.showwarning("Kuro_B787-8 Installer", "Re-run the batch file each time after updating B78XH to update FMC files.\nIf not, the instruments will not work properly.")
+    print('FMC files have been updated.')
+    messagebox.showinfo("Kuro_B787-8 Installer", "FMC files have been updated.")
+    os.chdir(pydir)
+
+
+root.mainloop()
