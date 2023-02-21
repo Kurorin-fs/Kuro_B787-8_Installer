@@ -9,7 +9,7 @@ MSFS Premium Delux Version(B787-10)
 HeavyDivision's B78XH(any version) (https://github.com/Heavy-Division/B78XH)
 
 Installations:
-run Kuro_B787-8_Installer.bat. 
+run Kuro_B787-8_Installer.bat
 
 Don't move any file by yourself.
 
@@ -20,26 +20,6 @@ If not, the instruments will not work properly.
 
 Creator:Kurorin(@kuro_x#4595)
 https://flightsim.to/profile/Kurorin
-----------
-Use FTSim+ Sound
-after install,
-
-1. Delete all files in Community/Kuro_B787-8/SimObjects/Kuro_B787-8/sound/  folder,
-
-2. Paste FTSim's "***.PC.PCK" and "sound.xml",
-
-("***.PC.PCK" should be name of FTSim+ sound file)
-
-3.Open Community/Kuro_B787-8/layout.json with notepad
-
-4. Edit
-
-"path": "SimObjects/Airplanes/Kuro_B787_8/sound/Asobo_B787_10.PC.PCK",
-
-(Line 154) to
-
-"path": "SimObjects/Airplanes/Kuro_B787_8/sound/***.PC.PCK",
-
 ----------
 
 Some credits goes to Microsoft, ASOBO Studios.
