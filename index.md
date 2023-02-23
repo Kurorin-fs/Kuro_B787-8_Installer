@@ -1,4 +1,5 @@
 # FAQ
+##### Last Updated On : Feb 23, 2023
 ## How to install this?
 double clink and run Kuro_B787-8_Installer.bat and follow the instructions.  
 
