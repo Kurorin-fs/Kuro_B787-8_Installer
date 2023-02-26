@@ -13,34 +13,11 @@ run Kuro_B787-8_Installer.bat. 
 
 Don't move any file by yourself.
 
-
-Re-run the batch file every time after updating B78XH.
-If not, the instruments will not work properly.
-
+FAQ:
+https://github.com/Kurorin-fs/Kuro_B787-8_Installer/blob/main/index.md
 
 Creator:Kurorin(@kuro_x#4595)
 https://flightsim.to/profile/Kurorin
-----------
-Use FTSim+ Sound
-after install,
-
-1. Delete all files in Community/Kuro_B787-8/SimObjects/Kuro_B787-8/sound/  folder,
-
-2. Paste FTSim's "***.PC.PCK" and "sound.xml",
-
-("***.PC.PCK" should be name of FTSim+ sound file)
-
-3.Open Community/Kuro_B787-8/layout.json with notepad
-
-4. Edit
-
-"path": "SimObjects/Airplanes/Kuro_B787_8/sound/Asobo_B787_10.PC.PCK",
-
-(Line 154) to
-
-"path": "SimObjects/Airplanes/Kuro_B787_8/sound/***.PC.PCK",
-
-----------
 
 Some credits goes to Microsoft, ASOBO Studios.
 Flight Simulator 2020 © Microsoft Corporation.

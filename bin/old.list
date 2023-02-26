@@ -22,3 +22,5 @@ return this.fmc.setZeroFuelWeight((298700 + B787_10_FMC_PayloadManagerPage.reque
         tryExecuteBAL() {\n            /*
              */\n        }\n        updateSideButtonActiveStatus() {
              if (altitude < 20) {\n             this._stopPitchInterval50 = true;
+            let econPromptCell = this.getEconCruisePromptCell();\n            this.setupCruisePageEvents();
+                ['STEP', 'OPT', 'MAX', 'RECMD'],\n                [],\n                ['', '__FMCSEPARATOR', ''],

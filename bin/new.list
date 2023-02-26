@@ -22,3 +22,5 @@ return this.fmc.setZeroFuelWeight((264500 + B787_10_FMC_PayloadManagerPage.reque
         tryExecuteBAL() {
         }\n        updateSideButtonActiveStatus() {
              if (altitude < 25) {\n             this._stopPitchInterval50 = true;
+            let econPromptCell = this.getEconCruisePromptCell();\n            /* Maximum & Optimum Flight level - Calculates uses linear regression derived formula from actual aircraft data */\n            let currentWeight = SimVar.GetSimVarValue("TOTAL WEIGHT", "pounds");\n            let maxFltLevel =  Math.min(431,(((-0.02898601 * currentWeight) + 52187.878787878784) / 100));\n            let optFltLevel  = Math.min(431,(((-0.04124126 * currentWeight) + 55942.42424242424) / 100));\n            let recmdFltLevel = Math.round(optFltLevel / 10) * 10;\n            this.setupCruisePageEvents();
+                ['STEP', 'OPT', 'MAX', 'RECMD'],\n                ['', '\xa0FL' + optFltLevel.toFixed(0), 'FL' + maxFltLevel.toFixed(0),  'FL' + recmdFltLevel.toFixed(0),],\n                ['', '__FMCSEPARATOR', ''],

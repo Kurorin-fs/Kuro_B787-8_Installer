@@ -9,8 +9,10 @@ import tkinter as tk
 import re
 import glob
 import logging
+import webbrowser
 
-version = "v1.1.2"
+version = "v1.1.4"
+faq_url = "https://github.com/Kurorin-fs/Kuro_B787-8_Installer/blob/main/index.md"
 logging.basicConfig(level=logging.DEBUG, filename="..\installer.log", format="%(asctime)s %(levelname)s: %(funcName)s: %(message)s")
 
 #icon
@@ -96,7 +98,9 @@ pydir = os.getcwd()
 zippath = os.path.join(os.getcwd(), 'main.zip')
 patchpath = os.path.join(os.getcwd(), 'xml.zip')
 HDpatchpath = os.path.join(os.getcwd(), 'newHD.zip')
+HDpatchpath2 = os.path.join(os.getcwd(), 'oldHD.zip')
 cfgpath = os.path.join(os.getcwd(), "livery-cfgs")
+cfgpath0 = os.path.join(os.getcwd(), "livery-cfgs0")
 logging.debug("path ok")
 #check if lists exist
 oldlistpath = os.path.join(os.getcwd(), 'old.list')
@@ -149,8 +153,6 @@ def AskCom():
         MSFSpath = os.environ['USERPROFILE']
     #ask users where Community is
     Community = filedialog.askdirectory(initialdir = MSFSpath, title='Kuro_B787-8 Installer - >>>Select Community Folder<<<') 
-    logging.info("Community Path = " + Community)
-    print("Community Path = " + Community)
     return Community
 
 #open config
@@ -170,6 +172,8 @@ if Community == "" or not os.path.exists(Community):
     messagebox.showinfo("Kuro_B787-8 Installer", "Select your MSFS Community folder in the next pop-up")
     #write config
     Community = AskCom()
+    logging.info("Community Path = " + Community)
+    print("Community Path = " + Community)
     with open(os.path.join(pydir, 'installer.cfg'), mode='w', encoding='utf-8') as config:
         config.write(Community)
         logging.debug("set Community (1)")
@@ -179,6 +183,9 @@ if Community == "" or not os.path.exists(Community):
 def info():
     messagebox.showinfo("Kuro_B787-8 Installer " + version, "This program is the installer/updater of Kuro_B787-8 for Microsoft Flight Simulator.\n\nRequired Contents :\nMSFS Premium Delux Version,\nHeavyDivision's B78XH(any version)\n\nCreator : Kurorin(@kuro_x#4595)\nhttps://flightsim.to/profile/Kurorin")
     logging.debug("Info")
+def faq():
+    webbrowser.open(faq_url)
+    logging.debug("faq")
 def AskCom0(entry1, sub_set, pydir):
     sub_set.attributes("-topmost", False)
     Community = AskCom()
@@ -188,6 +195,8 @@ def AskCom0(entry1, sub_set, pydir):
         with open(os.path.join(pydir, 'installer.cfg'), mode='w', encoding='utf-8') as config:
             config.write(Community)
             logging.info("write Community to cfg")
+        logging.info("Community Path = " + Community)
+        print("Community Path = " + Community)
     sub_set.attributes("-topmost", True)
 def closesettngs(entry1, sub_set):
     sub_set.destroy()
@@ -196,6 +205,7 @@ def closesettngs(entry1, sub_set):
     if not com =="":
         with open(os.path.join(pydir, 'installer.cfg'), mode='w', encoding='utf-8') as config:
             config.write(com.get())
+
 def settings(com, Commnuity, root):
     logging.debug("Settings")
     sub_set = tk.Toplevel()
@@ -230,7 +240,7 @@ def settings(com, Commnuity, root):
     combobox.set("DEBUG")
     combobox.place(relx = 0.35, rely = 0.75, relwidth = 0.2, anchor = tk.CENTER)
     '''
-def install(com):
+def install(com, patchpath, HDpatchpath, HDpatchpath2, cfgpath, cfgpath0):
     logging.debug("Install")
     with open(os.path.join(pydir, 'installer.cfg'), mode='r', encoding='utf-8') as config:
         configL = config.read().splitlines()
@@ -250,17 +260,78 @@ def install(com):
     HDname = ComInfo[0]
     HDPath = ComInfo[1]
     isHDB78XHnew = ComInfo[2]
-    isInstallperformed = check788exist(Community, zippath)
-    if not isInstallperformed:
+    #check788exist(v1.1.3)
+    KuroPath = os.path.join(Community, 'Kuro_B787-8')
+    checker788 = check788exist(Community, zippath, KuroPath)
+    willInstall = checker788[0]
+    isUpdate = checker788[1]
+    if not willInstall:
         logging.error("Installation canceled")
         print("Installation canceled")
         return
-    PatchnewHD(isHDB78XHnew, HDpatchpath, Community)
-    engAnim(Community, HDname, patchpath)
-    fmcUpdate(HDPath, Community, isHDB78XHnew)
-    checklivery(isHDB78XHnew, Community, cfgpath)
+    if isHDB78XHnew:
+        logging.info("separated B78XH")
+        print("separated B78XH")
+        isConvertOnly = 0
+        #checklivery(v1.1.3)
+        logging.debug("checklivery")
+        isLivConverted = liveryconv(Community, cfgpath, isConvertOnly, isUpdate)
+        if not isLivConverted:
+            endC()
+            return
+        else:#install
+            isInstallperformed = install788(Community, zippath, isUpdate, KuroPath)
+            if not isInstallperformed:
+                logging.error("Update canceled")
+                print("Update canceled")
+                return
+            isInstallperformed = PatchnewHD(isHDB78XHnew, HDpatchpath, HDpatchpath2, Community)
+            if not isInstallperformed:
+                logging.error("Update canceled")
+                print("Update canceled")
+                return
+            isInstallperformed = engAnim(Community, HDname, patchpath)
+            if not isInstallperformed:
+                logging.error("Update canceled")
+                print("Update canceled")
+                return
+            isInstallperformed = fmcUpdate(HDPath, Community, isHDB78XHnew)
+            if not isInstallperformed:
+                logging.error("Update canceled")
+                print("Update canceled")
+                return
+            convert(Community, cfgpath) 
+    else:
+        logging.info("non-separated B78XH")
+        print("non-separated B78XH")
+        isConvertOnly = 0
+        #install
+        isLivConverted = liveryconv0(Community, cfgpath0, isConvertOnly, isUpdate)
+        isInstallperformed = install788(Community, zippath, isUpdate, KuroPath)
+        if not isInstallperformed:
+            logging.error("Update canceled")
+            print("Update canceled")
+            return
+        isInstallperformed = PatchnewHD(isHDB78XHnew, HDpatchpath, HDpatchpath2, Community)
+        if not isInstallperformed:
+            logging.error("Update canceled")
+            print("Update canceled")
+            return
+        isInstallperformed = engAnim(Community, HDname, patchpath)
+        if not isInstallperformed:
+            logging.error("Update canceled")
+            print("Update canceled")
+            return
+        isInstallperformed = fmcUpdate(HDPath, Community, isHDB78XHnew)
+        if not isInstallperformed:
+            logging.error("Update canceled")
+            print("Update canceled")
+            return
+        convert0(Community, cfgpath0) 
     endI()
-def update(com):
+
+
+def update(com, patchpath, HDpatchpath, HDpatchpath2):
     logging.debug("Update")
     with open(os.path.join(pydir, 'installer.cfg'), mode='r', encoding='utf-8') as config:
         configL = config.read().splitlines()
@@ -280,13 +351,24 @@ def update(com):
     HDname = ComInfo[0]
     HDPath = ComInfo[1]
     isHDB78XHnew = ComInfo[2]
-    is788installed = fmcUpdate(HDPath, Community, isHDB78XHnew)
-    if not is788installed:
+    isInstallperformed = fmcUpdate(HDPath, Community, isHDB78XHnew)
+    if not isInstallperformed:
+        logging.error("Update canceled")
+        print("Update canceled")
+        return
+    isInstallperformed = PatchnewHD(isHDB78XHnew, HDpatchpath, HDpatchpath2, Community)
+    if not isInstallperformed:
+        logging.error("Update canceled")
+        print("Update canceled")
+        return
+    isInstallperformed = engAnim(Community, HDname, patchpath)
+    if not isInstallperformed:
         logging.error("Update canceled")
         print("Update canceled")
         return
     endF()
-def livery(com, cfgpath):
+
+def livery(com, cfgpath, cfgpath0):
     logging.debug("livery")
     with open(os.path.join(pydir, 'installer.cfg'), mode='r', encoding='utf-8') as config:
         configL = config.read().splitlines()
@@ -307,12 +389,20 @@ def livery(com, cfgpath):
     HDPath = ComInfo[1]
     isHDB78XHnew = ComInfo[2]
     if not isHDB78XHnew:
+        '''
+        isConvertOnly = 1
+        isUpdate = 0
+        isLivConverted = liveryconv0(Community, cfgpath0, isConvertOnly, isUpdate)
+        endL()
+        '''
         logging.warning("Installed B78XH is not separeted one.")
         print("Installed B78XH is not separeted one. No need to convert liveries.")
         messagebox.showwarning("Kuro_B787-8 Installer ", "The installed B78XH is not the one separeted from the Default B787-10.  No need to convert liveries.")
         return
     else:
-        isLivConverted = liveryconv(Community, cfgpath)
+        isConvertOnly = 1
+        isUpdate = 0
+        isLivConverted = liveryconv(Community, cfgpath, isConvertOnly, isUpdate)
         if not isLivConverted:
             return
         else:
@@ -336,19 +426,24 @@ com.set(Community)
 men = tk.Menu(root) 
 root.config(menu=men)
 root.deiconify()
+
 menu_file1 = tk.Menu(root, tearoff=0)
 menu_file2 = tk.Menu(root, tearoff=0)
+menu_file3 = tk.Menu(root, tearoff=0)
 men.add_cascade(label='Settings', menu=menu_file1) 
 menu_file1.add_command(label='Settings', command=lambda:settings(com, Community, root)) 
 menu_file1.add_separator() 
 menu_file1.add_command(label='Close', command=close)
-men.add_cascade(label='Info', menu=menu_file2) 
-menu_file2.add_command(label='Info', command=info)
-button1 = ttk.Button(root, text="Install/Update B787-8", command=lambda:install(com))
+men.add_cascade(label='FAQ', menu=menu_file2) 
+menu_file2.add_command(label='FAQ', command=faq)
+men.add_cascade(label='Info', menu=menu_file3) 
+menu_file3.add_command(label='Info', command=info)
+
+button1 = ttk.Button(root, text="Install/Update B787-8", command=lambda:install(com, patchpath, HDpatchpath, HDpatchpath2, cfgpath, cfgpath0))
 button1.place(relx = 0.5, rely = 0.2, relwidth = 0.8, anchor = tk.CENTER)
-button2 = ttk.Button(root, text="Update Only FMC files", command=lambda:update(com))
+button2 = ttk.Button(root, text="Update Only FMC/Anim files", command=lambda:update(com, patchpath, HDpatchpath, HDpatchpath2))
 button2.place(relx = 0.5, rely = 0.4, relwidth = 0.8, anchor = tk.CENTER)
-button3 = ttk.Button(root, text="Convert Livery", command=lambda:livery(com, cfgpath))
+button3 = ttk.Button(root, text="Convert Livery (For B78XH Soft Fork User)", command=lambda:livery(com, cfgpath, cfgpath0))
 button3.place(relx = 0.5, rely = 0.6, relwidth = 0.8, anchor = tk.CENTER)
 label1 = ttk.Label(root, text="Kurorin(@kuro_x#4595)")
 label1.place(relx = 0.5, rely = 0.8, anchor = tk.CENTER)
@@ -414,6 +509,8 @@ def setB78XH(Community):
         print("HeavyDivision's B78XH not found. Install it and try again.")
         messagebox.showerror("Kuro_B787-8 Installer - Installation Failed", "HeavyDivision's B78XH not found. Install it and try again.")
         return
+    logging.info("isHDB78XHnew =" + str(isHDB78XHnew))
+    print("isHDB78XHnew =" + str(isHDB78XHnew))
     return HDname, HDPath, isHDB78XHnew
 def SetCom(Community):
     logging.debug("SetCom")
@@ -438,37 +535,38 @@ def Copy788():
     print("Copied Kuro_B787-8 to Community")
 
 #check if 787-8 exists and install
-def check788exist(Community, zippath):
-    KuroPath = os.path.join(Community, 'Kuro_B787-8')
+def check788exist(Community, zippath, KuroPath):
     if os.path.exists(KuroPath):
         logging.info("Kuro_B787-8 found in Community folder")
         print("Kuro_B787-8 found in Community folder")
+        isUpdate = 1
         if messagebox.askyesno("Kuro_B787-8 Installer", "Kuro_B787-8 found in Community folder.\nDo you want to replace the current one?\n\nSelect Yes to continue.\nSelect No to abort reinstall"):
-            #check if zip exist
-            if not os.path.exists(zippath):
-                logging.error("Required Installer Component(main.zip) not found.")
-                print("Required Installer Component(main.zip) not found. Download and Extract the installer again.")
-                messagebox.showerror("Kuro_B787-8 Installer - Installation Failed", "Required Installer Component(main.zip) not found.\n(The file is required to install)\n\nDownload and Extract the installer again.")
-                isInstallperformed = 0
-            else:
-                #delete 787-8
-                logging.info("Deleting Kuro_B787-8 in Community")
-                print("Deleting Kuro_B787-8 in Community")
-                shutil.rmtree(KuroPath)
-                logging.info("Deleted Kuro_B787-8 in Community")
-                print("Deleted Kuro_B787-8 in Community")
-                #copy 787-8
-                Copy788()
-                isInstallperformed = 1
+            willInstall = 1
         else:
-            isInstallperformed = 0
-    #check if zip exists
-    elif not os.path.exists(zippath):
+            willInstall = 0
+    else:
+        isUpdate = 0
+        willInstall = 1#for temp
+    return willInstall, isUpdate
+
+def install788(Community, zippath, isUpdate, KuroPath):
+    #check if zip exist
+    if not os.path.exists(zippath):
         logging.error("Required Installer Component(main.zip) not found.")
         print("Required Installer Component(main.zip) not found. Download and Extract the installer again.")
-        messagebox.showerror("Kuro_B787-8 Installer - Installation Failed", "Required Installer Component(main.zip) not found. \n\nDownload and Extract the installer again.")
+        messagebox.showerror("Kuro_B787-8 Installer - Installation Failed", "Required Installer Component(main.zip) not found.\n(The file is required to install)\n\nDownload and Extract the installer again.")
         isInstallperformed = 0
-    else:
+    elif not isUpdate:#install
+        #copy 787-8
+        Copy788()
+        isInstallperformed = 1
+    else:#update
+        #delete 787-8
+        logging.info("Deleting Kuro_B787-8 in Community")
+        print("Deleting Kuro_B787-8 in Community")
+        shutil.rmtree(KuroPath)
+        logging.info("Deleted Kuro_B787-8 in Community")
+        print("Deleted Kuro_B787-8 in Community")
         #copy 787-8
         Copy788()
         isInstallperformed = 1
@@ -477,20 +575,18 @@ def check788exist(Community, zippath):
 
 
 
-
-
 #check if not HD78XH is newer (separated) one - v1.1.0
 #def - extract and copy new HD patch - v1.1.0
-def PatchnewHD(isHDB78XHnew, HDpatchpath, Community):
-    logging.debug("patch newHD")
+def PatchnewHD(isHDB78XHnew, HDpatchpath, HDpatchpath2, Community):
     if isHDB78XHnew:
+        logging.debug("patch newHD")
         if not os.path.exists(HDpatchpath):
-            logging.info("non-separated HD78XH")
-            print("non-separated HD78XH")
+            logging.info("separated HD78XH")
+            print("separated HD78XH")
             logging.error("Required Installer Component(newHD.zip) not found.")
             print("Required Installer Component(newHD.zip) not found. Download and Extract the installer again.")
             messagebox.showerror("Kuro_B787-8 Installer - Installation Failed", "newHD.zip not found.\n\nDownload and Extract the installer again.")
-            sys.exit()
+            isInstallperformed = 0
         else:
             logging.info("separated HD78XH")
             print("separated HD78XH")
@@ -501,6 +597,29 @@ def PatchnewHD(isHDB78XHnew, HDpatchpath, Community):
             patch_f1.close()
             logging.info("Patched files for newer (separated) B78XH")
             print("Patched files for newer (separated) B78XH")
+            isInstallperformed = 1
+    else:
+        logging.debug("patch oldHD")
+        if not os.path.exists(HDpatchpath2):
+            logging.info("non-separated HD78XH")
+            print("non-separated HD78XH")
+            logging.error("Required Installer Component(oldHD.zip) not found.")
+            print("Required Installer Component(oldHD.zip) not found. Download and Extract the installer again.")
+            messagebox.showerror("Kuro_B787-8 Installer - Installation Failed", "oldHD.zip not found.\n\nDownload and Extract the installer again.")
+            isInstallperformed = 0
+        else:
+            logging.info("non-separated HD78XH")
+            print("non-separated HD78XH")
+            logging.info("Patching files for older (non-separated) B78XH")
+            print("Patching files for older (non-separated) B78XH")
+            patch_f2 = zipfile.ZipFile(HDpatchpath2, "r")
+            patch_f2.extractall(Community)
+            patch_f2.close()
+            logging.info("Patched files for older (non-separated) B78XH")
+            print("Patched files for older (non-separated) B78XH")
+            isInstallperformed = 1
+    return isInstallperformed
+
 
 def fmcUpdate(HDPath, Community, isHDB78XHnew):
     #copy HD78XH's FMC files -v1.1.0
@@ -510,12 +629,13 @@ def fmcUpdate(HDPath, Community, isHDB78XHnew):
         fmcpath7878 = os.path.join(Community, 'Kuro_B787-8\html_ui\Pages\VCockpit\Instruments\Airliners\Heavy-Division-B78XH-mod\FMC')
     else:
         fmcpath7878 = os.path.join(Community, 'Kuro_B787-8\html_ui\Pages\VCockpit\Instruments\Airliners\B787_10\FMC')
+    print(fmcpath7878)
     if not os.path.exists(fmcpath7878):
-        is788installed = 0
+        isInstallperformed = 0
         logging.error("Kuro_B787-8 not found.")
         print("Kuro_B787-8 not found. Install it and try again.")
         messagebox.showerror("Kuro_B787-8 Installer - Installation Failed", "Kuro_B787-8 not found. Install it and try again.")
-        return is788installed
+        return isInstallperformed
     shutil.copyfile('B787_10_FMC.html', fmcpath7878 + '\B787_8_FMC.html')
     shutil.copyfile('hdfmc.js', fmcpath7878 + '\hdfmc8.js')
     logging.info("Copied HDfiles to Kuro_B787-8")
@@ -540,8 +660,8 @@ def fmcUpdate(HDPath, Community, isHDB78XHnew):
             jscontent= jscontent.replace(O, N)
     with open(FMC788js, mode="w", encoding="UTF-8") as js2:
         js2.write(jscontent)
-    is788installed = 1
-    return is788installed
+    isInstallperformed = 1
+    return isInstallperformed
 
 #def - extract and copy older xml - v1.0.6
 def PatchXML():
@@ -562,36 +682,22 @@ def engAnim(Community, HDname, patchpath):
             logging.error("Required Installer Component(xml.zip) not found. Download and Extract the installer again.")
             print("Required Installer Component(xml.zip) not found.")
             messagebox.showerror("Kuro_B787-8 Installer - Installation Failed", "xml.zip not found.\n\nDownload and Extract the installer again.")
-            sys.exit()
+            isInstallperformed = 0
         else:
             logging.info("Use old engines animation")
             print("Use old engines animation")
             PatchXML()
-
-#livery updater v1.1.0
-def liveryconv(Community, cfgpath):
-    logging.debug("liveryconv")
-    if messagebox.askyesno("Kuro_B787-8 Installer", "The installer has detected that you are using the recently released B78XH, which is separated from the Default B787-10.\nThe previous B787-8 liveries are not compatible and cause fmc not to show up or CTD.\nDo you want to convert all liveries for B787-8 installed in your Community folder?\n(This operation cannot be undone.  Also, this feature is experimental.)"):
-        convert(Community, cfgpath)
-        isLivConverted = 1
+            isInstallperformed = 1
     else:
-        isLivConverted = 0
-    return isLivConverted
-    os.chdir(pydir)
+        isInstallperformed = 1
+    return isInstallperformed
 
-def checklivery(isHDB78XHnew, Community, cfgpath):
-    logging.debug("checklivery")
-    if isHDB78XHnew:
-        logging.info("separated B78XH")
-        print("separated B78XH")
-        liveryconv(Community, cfgpath)
-    os.chdir(pydir)
 
 #livery converter v1.1.2
 def convert(Community, cfgpath):
     os.chdir(Community)
     for filename1 in glob.glob('**/aircraft.cfg', recursive=True):
-        f1 = open(filename1, mode="r", encoding="UTF-8")
+        f1 = open(filename1, mode="r")
         s1 = f1.read()
         f1.close()
         if 'Kuro_B787_8' in s1:
@@ -607,22 +713,89 @@ def convert(Community, cfgpath):
             for panel1 in glob.glob(os.path.join(dirname1, 'panel.*/panel.cfg')):
                 shutil.copyfile(cfgpath + r'\panel.cfg', panel1)
 
+#livery updater v1.1.0
+def liveryconv(Community, cfgpath, isConvertOnly, isUpdate):
+    logging.debug("liveryconv")
+    #Install or just convert livery
+    if not isConvertOnly and isUpdate:#update
+        LivInstMessage = "\n\nIf you select No, conversion will NOT be performed, AND the update will also be automatically canceled. ; Install Stable/Dev(~v0.1.15 or so) B78XH and run again."
+    elif not isConvertOnly and not isUpdate:#install
+        LivInstMessage = "\n\nIf you select No, conversion will NOT be performed, AND the installation will also be automatically canceled. ; Install Stable/Dev(~v0.1.15 or so) B78XH and run again."
+    else:
+        LivInstMessage = ""
+    if messagebox.askyesno("Kuro_B787-8 Installer", """The installer has detected that you are using the recently released B78XH.
+The B78XH v0.1.15-22(exp)~ is named "B78XH soft fork" and is separated from the Asobo(Default) B787-10. This will apply to Stable and Dev as well.
+
+If you are using the B78XH soft fork, the previous B787-8 and its liveries are not compatible and the fmc/cockpit will not show up or it cause CTD.
+Do you want to convert all the liveries for the B787-8 installed in your Community folder?
+(Including third party liveries created from the official Paint Kit)
+>>This operation cannot be undone.<<
+
+>>>If you want to revert to "non-soft fork" and use the B787-8, you will need to reinstall the B787-8. At that time, the installer will revert all the liveries automatically.<<<""" + LivInstMessage):
+        
+        if not isConvertOnly:#install
+            isLivConverted = 1
+        else:#convert only
+            convert(Community, cfgpath)
+            isLivConverted = 1
+    else:
+        isLivConverted = 0
+    return isLivConverted
+    os.chdir(pydir)
+
+
+#livery updater for older one v1.1.4
+def liveryconv0(Community, cfgpath0, isConvertOnly, isUpdate):
+    logging.debug("liveryconv0")
+    if not isConvertOnly:#install
+        isLivConverted = 1
+    else:#convert only
+        convert0(Community, cfgpath0)
+        isLivConverted = 1
+    return isLivConverted
+    os.chdir(pydir)
+
+#livery converter for older one v1.1.4
+def convert0(Community, cfgpath0):
+    os.chdir(Community)
+    for filename1 in glob.glob('**/aircraft.cfg', recursive=True):
+        f1 = open(filename1, mode="r")
+        s1 = f1.read()
+        f1.close()
+        if 'Kuro_B787_8' in s1:
+            dirname1 = os.path.dirname(filename1)
+            print("Scanned : " + dirname1)
+            #model.cfg
+            for model1 in glob.glob(os.path.join(dirname1, 'model.*/model.cfg')):
+                shutil.copyfile(cfgpath0 + r'\model.cfg', model1)
+            #texture.cfg
+            for tex1 in glob.glob(os.path.join(dirname1, 'texture.*/texture.cfg')):
+                shutil.copyfile(cfgpath0 + r'\texture.cfg', tex1)
+            #panel.cfg
+            for panel1 in glob.glob(os.path.join(dirname1, 'panel.*/panel.cfg')):
+                shutil.copyfile(cfgpath0 + r'\panel.cfg', panel1)
+
 def endI():
-    print('Re-run the batch file each time after updating B78XH. If not, the instruments will not work properly.')
-    messagebox.showwarning("Kuro_B787-8 Installer", "Re-run the batch file each time after updating B78XH to update FMC files.\nIf not, the instruments will not work properly.")
-    logging.info('Installation/Update has completed')
-    print('Installation/Update has completed')
-    messagebox.showinfo("Kuro_B787-8 Installer", "Installation/Update has completed.")
+    print('Update FMC/Animation files each time after updating B78XH. If not, the instruments/animations will not work properly.')
+    messagebox.showwarning("Kuro_B787-8 Installer", "Update FMC/Animation files each time after updating B78XH.\nIf not, the instruments/animations will not work properly.")
+    logging.info('Installation/Update has been completed')
+    print('Installation/Update has been completed')
+    messagebox.showinfo("Kuro_B787-8 Installer", "Installation/Update has been completed.")
     os.chdir(pydir)
 def endF():
-    logging.info('FMC files have been updated.')
-    print('FMC files have been updated.')
-    messagebox.showinfo("Kuro_B787-8 Installer", "FMC files have been updated.")
+    logging.info('FMC/Animation files have been updated.')
+    print('FMC/Animation files have been updated.')
+    messagebox.showinfo("Kuro_B787-8 Installer", "FMC/Animation files have been updated.")
     os.chdir(pydir)
 def endL():
     logging.info('Livery configs have been updated.')
     print('Livery configs have been updated.')
     messagebox.showinfo("Kuro_B787-8 Installer", "Livery configs have been updated.")
+    os.chdir(pydir)
+def endC():
+    logging.info('Installation/Update has been automatically canceled.')
+    print('Installation/Update has been automatically canceled.')
+    messagebox.showinfo("Kuro_B787-8 Installer", "Installation has been automatically canceled.")
     os.chdir(pydir)
 
 
