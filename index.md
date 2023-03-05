@@ -1,5 +1,5 @@
 # FAQ
-##### Last Updated On : Feb 25, 2023
+##### Last Updated On : Mar 5, 2023
 ## How to install this?
 double clink and run Kuro_B787-8_Installer.bat and follow the instructions.  
 
@@ -13,10 +13,12 @@ No.
 ## No EFB?
 No.
 
-## Engine animations are broken
+## Engine animations are broken (NEW!)
 - Update Anim files from the installer.  
 (When you switched/updated B78XH to another version, you also need to update FMC/Anim files using the installer)
-
+- The problem is due to a change in the latest B78XH.
+My default liveries can be fixed by using installer, but for others, contact the respective livery creator. I cannot fix them.  
+(Hint for creators: ASOBO_ENGINE_Turbine_Template->HEAVY_787_ENGINE_Turbine_Template)
 ## Cockpit lights not working (NEW!)
 Remove all light mods from your Community folder.
 
