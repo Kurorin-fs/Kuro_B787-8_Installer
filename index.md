@@ -1,7 +1,7 @@
 # FAQ
 ##### Last Updated On : June 26, 2023
 ## How to install this?
-double clink and run Kuro_B787-8_Installer.bat and follow the instructions.  
+double click and run Kuro_B787-8_Installer.bat and follow the instructions.  
 
 Required Contents :  
 MSFS Premium Delux Version (B787-10)  
@@ -31,11 +31,11 @@ Remove all light mods from your Community folder.
 Patch it from the Installer.
 
 ## Some Sounds are missing
-- Disable Custom SoundPack in the Installer and reinstall B787-8
 - All Soundpacks released before AAU2 Update(1.33.8.0,  Date: June 23th, 2023) are no longer compatible.
 (So if you’re FTSim’ user, you need to update Soundpacks newer than v1.49)
+- Disable Custom SoundPack in the Installer and reinstall B787-8
 
-## Livries are broken
+## Liveries are broken
 - Convert liveries from the installer.  
 (Btw, Third party liveries are not supported by me.)
 
