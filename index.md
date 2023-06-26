@@ -5,7 +5,7 @@ double clink and run Kuro_B787-8_Installer.bat and follow the instructions.
 
 Required Contents :  
 MSFS Premium Delux Version (B787-10)  
-~~HeavyDivision's B78XH(any version)~~ ;No longer required since v2.0.0
+~~HeavyDivision's B78XH(any version)~~ ; is no longer required since v2.0.0. And if you had used Stable/DEV version, it should be removed.
 
 ## No Cabin interior?
 No.
