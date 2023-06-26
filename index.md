@@ -12,7 +12,7 @@ No.
 
 ## No EFB?
 Not yet.
-At the earliest, after WT implemented it on the 787-10.
+At the earliest, after WT implemented it on the B787-10.
 
 ## Camera positioning is wrong
 Remove all camera mods from your Community folder.
@@ -21,7 +21,7 @@ Remove all camera mods from your Community folder.
 Remove all light mods from your Community folder.
 
 ## Instruments are broken/Screens are black or inop on initial load
-- (First of all, have you installed MSFS's 787-10?)
+- (First of all, have you installed MSFS's B787-10?)
 - Delete HeavyDivision’s B78XH mod
 - Convert liveries from the installer.  
 (Btw, Third party liveries are not supported by me.)
@@ -31,7 +31,7 @@ Remove all light mods from your Community folder.
 Patch it from the Installer.
 
 ## Some Sounds are missing
-- Disable Custom SoundPack in the Installer and reinstall.
+- Disable Custom SoundPack in the Installer and reinstall B787-8
 - All Soundpacks released before AAU2 Update(1.33.8.0,  Date: June 23th, 2023) are no longer compatible.
 (So if you’re FTSim’ user, you need to update Soundpacks newer than v1.49)
 
