@@ -35,6 +35,10 @@ Patch it from the Installer.
 - All Soundpacks released before AAU2 Update(1.33.8.0,  Date: June 23th, 2023) are no longer compatible.
 (So if you’re FTSim’ user, you need to update Soundpacks newer than v1.49)
 
+## Livries are broken
+- Convert liveries from the installer.  
+(Btw, Third party liveries are not supported by me.)
+
 ## Everything shows pink
 - Update B787-10 from Content Manager / Stop using pirated contents.
 
