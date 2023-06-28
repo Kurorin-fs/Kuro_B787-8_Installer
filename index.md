@@ -10,7 +10,7 @@
 
   <strong>Required Contents :</strong>
  - MSFS Premium Delux Version (B787-10)  
- - ~~HeavyDivision's B78XH(any version)~~ ; is no longer required since v2.0.0. And if you had used Stable/DEV version, it should be removed.
+ - ~~HeavyDivision's B78XH(any version)~~ ; is no longer required since v2.0.0. And <strong>if you have used Stable/DEV version, it should be removed.</strong>
 
 </details>
 
