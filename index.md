@@ -1,5 +1,5 @@
 # FAQ
-##### Last Updated On : June 28, 2023
+##### Last Updated On : July 1, 2023
 ###### For v2.0.0~
 
 
@@ -11,6 +11,13 @@
   <strong>Required Contents :</strong>
  - MSFS Premium Delux Version (B787-10)  
  - ~~HeavyDivision's B78XH(any version)~~ ; is no longer required since v2.0.0. And <strong>if you have used Stable/DEV version, it should be removed.</strong>
+
+</details>
+
+<details><summary><strong>Simbrief Profile?</strong></summary></big>
+  
+- [SimBrief Profile
+(GENX-1B64/TRENT1000-H2)](https://dispatch.simbrief.com/airframes/share/eyJiYXNldHlwZSI6IkI3ODgiLCJpY2FvIjoiQjc4OCIsInJlZyI6IkpBNzhLUiIsImZpbiI6IjExMjMiLCJzZWxjYWwiOiJXVEtSIiwiaGV4Y29kZSI6IiIsIm5hbWUiOiJCNzg3LTgiLCJlbmdpbmVzIjoiIiwiY29tbWVudHMiOiJLUkI3ODggdjIsIEdFTlgtMUI2NC9UUkVOVDEwMDAtSDIiLCJwbGFudW5pdHMiOiIwIiwicGVyIjoiRCIsImNhdCI6IkgiLCJlcXVpcCI6IlNERTFFMkUzRkdISUoySjNKNEo1TTFSV1hZWiIsInRyYW5zcG9uZGVyIjoiTEIxRDEiLCJwYm4iOiJBMUIxQzFEMUwxTzFTMiIsImV0b3BzcmFuZ2UiOiIiLCJleHRyYXJtayI6IiIsIndndHVuaXRzIjoiS0dTIiwibWF4cGF4IjoiMjQwIiwicGF4d2d0IjoiNzkiLCJiYWd3Z3QiOiIyNSIsIm9ldyI6IjExOTk3NSIsIm16ZnciOiIxNjEwMjUiLCJtdG93IjoiMjI3OTMwIiwibWx3IjoiMTcyMzY1IiwibWF4ZnVlbCI6IjEwMTMyMyIsIm1heGNhcmdvIjoiIiwiY2FyZ29tb2RlIjoiIiwiZGVmYXVsdGNpIjoiIiwiZnVlbGZhY3RvciI6IlAwMCIsImNlaWxpbmciOiI0MzEwMCIsImNydWlzZW9mZnNldCI6IlAwMDAwIn0-)
 
 </details>
 
@@ -64,8 +71,7 @@ At the earliest, after WT implemented it on the B787-10.
 
 <details><summary><strong>Liveries are broken</strong></summary>
 
-- Convert liveries from the installer.  
-(Btw, Third party Liveries are not supported by me.)
+- Converting liveries from the installer would help you - (Btw, Third party Liveries are not supported by me.)
 
 </details>
 
