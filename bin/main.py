@@ -1350,8 +1350,8 @@ def convert(Community, root):
                 with open(mdlXML[0], mode="w", encoding="UTF-8") as Conxml2:
                     Conxml2.write(Conxml1)
             m=m+1
-            isConverted = True
-            return isConverted
+        isConverted = True
+        return isConverted
     else:
         messagebox.showinfo("Kuro_B787-8 Installer", "There are no liveries to convert\n(= You haven't installed any third party liveries)")
         isConverted = False
