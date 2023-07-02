@@ -1,5 +1,5 @@
 # FAQ
-##### Last Updated On : July 1, 2023
+##### Last Updated On : July 2, 2023
 ###### For v2.0.0~
 
 
@@ -11,6 +11,15 @@
   <strong>Required Contents :</strong>
  - MSFS Premium Delux Version (B787-10)  
  - ~~HeavyDivision's B78XH(any version)~~ ; is no longer required since v2.0.0. And <strong>if you have used Stable/DEV version, it should be removed.</strong>
+
+</details>
+
+<details><summary><strong>The Installer Freezes</strong></summary>
+
+- Wait until the next window appears. Although the process may appear inactive at times, it is still running.    
+
+- Don't click/touch Command Prompt Window  
+- Disable QuickEdit Command Prompt Window ([Click here to see how](https://i.stack.imgur.com/GGPXR.gif))  
 
 </details>
 
