@@ -5,8 +5,7 @@ This mod is not part of the HeavyDivision project, so please do not ask them for
 The program is the installer/updater of Kuro_B787-8 for Microsoft Flight Simulator.
 
 Required Contents : 
-MSFS Premium Delux Version(B787-10)
-HeavyDivision's B78XH(any version) (https://github.com/Heavy-Division/B78XH)
+MSFS Premium Delux Version (B787-10, AAU2 or later)
 
 Installations:
 run Kuro_B787-8_Installer.bat. 
@@ -16,7 +15,7 @@ Don't move any file by yourself.
 FAQ:
 https://github.com/Kurorin-fs/Kuro_B787-8_Installer/blob/main/index.md
 
-Creator:Kurorin(@kuro_x#4595)
+Creator:Kurorin(Discord:@kuro_x#4595)
 https://flightsim.to/profile/Kurorin
 
 Some credits goes to Microsoft, ASOBO Studios.

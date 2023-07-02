@@ -1,0 +1,3 @@
+https://github.com/HughesMDflyer4/MSFSLayoutGenerator/blob/master/LICENSE
+
+MSFSLayoutGenerator is under MIT License, Created by HughesMDflyer4.

@@ -1,6 +1,8 @@
 from tkinter import filedialog
 from tkinter import messagebox
 from tkinter import ttk
+from chardet import detect
+import json
 import os
 import zipfile
 import shutil
@@ -10,9 +12,22 @@ import re
 import glob
 import logging
 import webbrowser
+import xml.etree.ElementTree as ET
+import subprocess
+import configparser
+import stat
+import datetime
 
-version = "v1.1.4"
+#remove_readonly - shutil.rmtree
+def remove_readonly(func, path, excinfo):
+    os.chmod(path, stat.S_IWRITE)
+    func(path)
+
+
+version = "v2.0.0"
 faq_url = "https://github.com/Kurorin-fs/Kuro_B787-8_Installer/blob/main/index.md"
+fsto_url = "https://flightsim.to/file/45062/boeing-787-8"
+sb_url = "https://dispatch.simbrief.com/airframes/share/eyJiYXNldHlwZSI6IkI3ODgiLCJpY2FvIjoiQjc4OCIsInJlZyI6IkpBNzhLUiIsImZpbiI6IjExMjMiLCJzZWxjYWwiOiJXVEtSIiwiaGV4Y29kZSI6IiIsIm5hbWUiOiJCNzg3LTgiLCJlbmdpbmVzIjoiIiwiY29tbWVudHMiOiJLUkI3ODggdjIsIEdFTlgtMUI2NC9UUkVOVDEwMDAtSDIiLCJwbGFudW5pdHMiOiIwIiwicGVyIjoiRCIsImNhdCI6IkgiLCJlcXVpcCI6IlNERTFFMkUzRkdISUoySjNKNEo1TTFSV1hZWiIsInRyYW5zcG9uZGVyIjoiTEIxRDEiLCJwYm4iOiJBMUIxQzFEMUwxTzFTMiIsImV0b3BzcmFuZ2UiOiIiLCJleHRyYXJtayI6IiIsIndndHVuaXRzIjoiS0dTIiwibWF4cGF4IjoiMjQwIiwicGF4d2d0IjoiNzkiLCJiYWd3Z3QiOiIyNSIsIm9ldyI6IjExOTk3NSIsIm16ZnciOiIxNjEwMjUiLCJtdG93IjoiMjI3OTMwIiwibWx3IjoiMTcyMzY1IiwibWF4ZnVlbCI6IjEwMTMyMyIsIm1heGNhcmdvIjoiIiwiY2FyZ29tb2RlIjoiIiwiZGVmYXVsdGNpIjoiIiwiZnVlbGZhY3RvciI6IlAwMCIsImNlaWxpbmciOiI0MzEwMCIsImNydWlzZW9mZnNldCI6IlAwMDAwIn0-"
 logging.basicConfig(level=logging.DEBUG, filename="..\installer.log", format="%(asctime)s %(levelname)s: %(funcName)s: %(message)s")
 
 #icon
@@ -96,37 +111,27 @@ root.tk.call('wm', 'iconphoto', root._w, tk.PhotoImage(data=data))
 #zip Path
 pydir = os.getcwd()
 zippath = os.path.join(os.getcwd(), 'main.zip')
-patchpath = os.path.join(os.getcwd(), 'xml.zip')
-HDpatchpath = os.path.join(os.getcwd(), 'newHD.zip')
-HDpatchpath2 = os.path.join(os.getcwd(), 'oldHD.zip')
-cfgpath = os.path.join(os.getcwd(), "livery-cfgs")
-cfgpath0 = os.path.join(os.getcwd(), "livery-cfgs0")
 logging.debug("path ok")
+
+
 #check if lists exist
 oldlistpath = os.path.join(os.getcwd(), 'old.list')
 newlistpath = os.path.join(os.getcwd(), 'new.list')
 logging.debug("list ok")
-if not os.path.exists(oldlistpath) or not os.path.exists(newlistpath):
-    logging.error("Required Installer Components(old.list or new.list) not found. Download and Extract the installer again.")
-    messagebox.showerror("Kuro_B787-8 Installer - Installation Failed", "Required Installer Components(old.list or new.list) not found. \n\nDownload and Extract the installer again.")
-    sys.exit()
 
-#read list
-oldlist = "old.list"
-newlist = "new.list"
-with open(oldlist, "r", encoding="utf-8") as oldlistT:
-	oldjs = oldlistT.read().splitlines()
-with open(newlist, "r", encoding="utf-8") as newlistT:
-	newjs = newlistT.read ().splitlines()
-oldjs = [item.replace('\\n', '\n') for item in oldjs]
-newjs = [item.replace('\\n', '\n') for item in newjs]
-logging.debug("read list")
+
 #Intro
 def intro():
     logging.debug("Intro")
-    print("\nThis program is the installer/updater of Kuro_B787-8 for Microsoft Flight Simulator.    Creator:Kurorin(@kuro_x#4595)\nRequired Contents : MSFS Premium Delux Version, HeavyDivision's B78XH(any version)")
-    messagebox.showinfo("Kuro_B787-8 Installer " + version, "This program is the installer/updater of Kuro_B787-8 for Microsoft Flight Simulator.\n\nRequired Contents :\nMSFS Premium Delux Version,\nHeavyDivision's B78XH(any version)\n\nCreator : Kurorin(@kuro_x#4595)\nhttps://flightsim.to/profile/Kurorin\n\nPress OK to Continue")
-#lines open Usercfg.opt
+    print("\nThis program is the installer/updater of Kuro_B787-8 for Microsoft Flight Simulator.    Creator:Kurorin(@kuro_x#4595)\nRequired Contents : MSFS Premium Delux Version)")
+    messagebox.showinfo("Kuro_B787-8 Installer " + version, "This program is the installer/updater of Kuro_B787-8 for Microsoft Flight Simulator.\n\nRequired Contents :\nMSFS Premium Delux Version\n\nCreator : Kurorin(@kuro_x#4595)\nhttps://flightsim.to/profile/Kurorin\n\nPress OK to Continue")
+
+
+def close():
+    logging.debug("close")
+    sys.exit()
+
+#open Usercfg.opt
 def OpenOpt():
     f = open('usercfg.opt', 'r') 
     alltxt = f.readlines()
@@ -155,16 +160,658 @@ def AskCom():
     Community = filedialog.askdirectory(initialdir = MSFSpath, title='Kuro_B787-8 Installer - >>>Select Community Folder<<<') 
     return Community
 
-#open config
-with open(os.path.join(pydir, 'installer.cfg'), mode='r', encoding='utf-8') as config:
-    configL = config.read().splitlines()
-    if configL:
-        Community = configL[0]
-        logging.debug("read Community from cfg")
+#settings - window topmost
+def AskCom1(sub_set):
+    #MS Store Path
+    USERCFGpathM = os.path.join((os.environ['USERPROFILE']), 'AppData\Local\Packages\Microsoft.FlightSimulator_8wekyb3d8bbwe\LocalCache')
+    #Steam Path
+    USERCFGpathS = os.path.join((os.environ['USERPROFILE']), 'AppData\Roaming\Microsoft Flight Simulator')
+    if os.path.exists(os.path.join(USERCFGpathM, 'usercfg.opt')):
+        os.chdir(USERCFGpathM)
+        MSFSpath = OpenOpt()
+    elif os.path.exists(os.path.join(USERCFGpathS, 'usercfg.opt')):
+        os.chdir(USERCFGpathS)
+        MSFSpath = OpenOpt()
     else:
-        Community = ""
-        intro()
+        MSFSpath = os.environ['USERPROFILE']
+    #ask users where Community is
+    Community = filedialog.askdirectory(parent=sub_set, initialdir = MSFSpath, title='Kuro_B787-8 Installer - >>>Select Community Folder<<<') 
+    return Community
+'''def AskGESp(sub_set, pydir, Sp1):
+    GESpPath = filedialog.askopenfilename(parent=sub_set, filetypes = [('GE Sp Sound.xml', '*.xml')], initialdir = os.environ['USERPROFILE'], title='Kuro_B787-8 Installer - >>>Select GE SoundPack sound.xml<<<')
+    if not GESpPath =="":
+        OrgGESp = os.path.dirname(GESpPath)
+        print(OrgGESp)
+        TempGE = os.path.join(pydir, 'Sp/GE')
+        if not os.path.exists(OrgGESp):
+            print("GE Sp not found in the folder you specified. GE Sp setting is disabled.")
+            messagebox.showwarning("Kuro_B787-8 Installer ", "GE Sp not found in the folder you specified. GE Sp setting is disabled.")
+            with open(os.path.join(pydir, 'settings.jsonc'), mode='w', encoding='utf-8') as config_json:
+                config_L["GESpDate"] = ""
+                config_L["UseGESp"] = bool(0)
+                json.dump(config_L, config_json)
+            return
+        else:
+            shutil.rmtree(TempGE, onerror=remove_readonly)
+            shutil.copytree(OrgGESp , TempGE, dirs_exist_ok=True)
+            Sp1.set(datetime.datetime.now().strftime('%Y/%m/%d %H:%M:%S'))
+        sub_set.attributes("-topmost", True)
+    return Community'''
 
+def AskGESp(sub_set, pydir, Sp1):
+    GESpPath = filedialog.askopenfilename(parent=sub_set, filetypes = [('GE Sp Sound.xml', '*.xml')], initialdir = os.environ['USERPROFILE'], title='Kuro_B787-8 Installer - >>>Select GE SoundPack sound.xml<<<')
+    if not GESpPath =="":
+        OrgGESp = os.path.dirname(GESpPath)
+        SpFiles = []
+        SpFiles.append(GESpPath)
+        #add Sp files
+        with open(GESpPath, "r", encoding="utf-8") as f:
+            for line in f:
+                if re.search("MainPackage", line):
+                    linexml = ET.fromstring(line)
+                    Filename=linexml.attrib.get('Name')+".PC.pck"
+                    SpFiles.append(os.path.join(OrgGESp, Filename))
+                if re.search("AdditionalPackage", line):
+                    linexml = ET.fromstring(line)
+                    Filename=linexml.attrib.get('Name')+".PC.pck"
+                    SpFiles.append(os.path.join(OrgGESp, Filename))
+        print(SpFiles)
+        TempGE = os.path.join(pydir, 'Sp/GE')
+        if not os.path.exists(OrgGESp):
+            print("GE Sp not found in the folder you specified. GE Sp setting is disabled.")
+            messagebox.showwarning("Kuro_B787-8 Installer ", "GE Sp not found in the folder you specified. GE Sp setting is disabled.")
+            with open(os.path.join(pydir, 'settings.jsonc'), mode='w', encoding='utf-8') as config_json:
+                config_L["GESpDate"] = ""
+                config_L["UseGESp"] = bool(0)
+                json.dump(config_L, config_json)
+            return
+        else:
+            with open(os.path.join(pydir, 'settings.jsonc'), mode='w', encoding='utf-8') as config_json:
+                config_L["GESpDate"] = datetime.datetime.now().strftime('%Y/%m/%d %H:%M:%S')
+                json.dump(config_L, config_json)
+            shutil.rmtree(TempGE, onerror=remove_readonly)
+            os.mkdir(TempGE)
+            for SpFile in SpFiles:
+                shutil.copy(SpFile , TempGE)
+            Sp1.set(datetime.datetime.now().strftime('%Y/%m/%d %H:%M:%S'))
+        sub_set.attributes("-topmost", True)
+    return Community
+
+def AskRRSp(sub_set, pydir, Sp2):
+    RRSpPath = filedialog.askopenfilename(parent=sub_set, filetypes = [('RR Sp Sound.xml', '*.xml')], initialdir = os.environ['USERPROFILE'], title='Kuro_B787-8 Installer - >>>Select RR SoundPack sound.xml<<<') 
+    if not RRSpPath =="":
+        OrgRRSp = os.path.dirname(RRSpPath)
+        SpFiles = []
+        SpFiles.append(RRSpPath)
+        #add Sp files
+        with open(RRSpPath, "r", encoding="utf-8") as f:
+            for line in f:
+                if re.search("MainPackage", line):
+                    linexml = ET.fromstring(line)
+                    Filename=linexml.attrib.get('Name')+".PC.pck"
+                    SpFiles.append(os.path.join(OrgRRSp, Filename))
+                if re.search("AdditionalPackage", line):
+                    linexml = ET.fromstring(line)
+                    Filename=linexml.attrib.get('Name')+".PC.pck"
+                    SpFiles.append(os.path.join(OrgRRSp, Filename))
+        print(SpFiles)
+        TempRR = os.path.join(pydir, 'Sp/RR')
+        if not os.path.exists(OrgRRSp):
+            print("RR Sp not found in the folder you specified. RR Sp setting is disabled.")
+            messaRRbox.showwarning("Kuro_B787-8 Installer ", "RR Sp not found in the folder you specified. RR Sp setting is disabled.")
+            with open(os.path.join(pydir, 'settings.jsonc'), mode='w', encoding='utf-8') as config_json:
+                config_L["RRSpDate"] = ""
+                config_L["UseRRSp"] = bool(0)
+                json.dump(config_L, config_json)
+            return
+        else:
+            with open(os.path.join(pydir, 'settings.jsonc'), mode='w', encoding='utf-8') as config_json:
+                config_L["RRSpDate"] = datetime.datetime.now().strftime('%Y/%m/%d %H:%M:%S')
+                json.dump(config_L, config_json)
+            shutil.rmtree(TempRR, onerror=remove_readonly)
+            os.mkdir(TempRR)
+            for SpFile in SpFiles:
+                shutil.copy(SpFile , TempRR)
+            Sp2.set(datetime.datetime.now().strftime('%Y/%m/%d %H:%M:%S'))
+        sub_set.attributes("-topmost", True)
+    return Community
+
+#open config
+with open(os.path.join(pydir, 'settings.jsonc'), mode='r', encoding='utf-8') as config_json:
+    config_L=json.load(config_json)
+    Community = config_L["CommunityPath"]
+    UseGESp = config_L["UseGESp"]
+    GESpDate = config_L["GESpDate"]
+    UseRRSp = config_L["UseRRSp"]
+    RRSpDate = config_L["RRSpDate"]
+    isFirstInstall = config_L["isFirstInstall"]
+    logging.debug("read Community from cfg")
+    print("Community Path = " + Community)
+
+#Find Camera
+def chkCam(Community):
+    logging.debug("chkCam")
+    os.chdir(Community)
+    Campath0 = os.path.join(Community, 'z_knusprigvej-b788-fixed-cam')
+    #Campath1 = os.path.join(Community, '')
+    if os.path.exists(Campath0):
+        isCam = True
+        Campath = Campath0
+        logging.info("Custom Views found")
+        print("Custom Views found")
+    else:
+        isCam = False
+        Campath = ""
+    return isCam, Campath
+
+#Find HD78XH
+def chkB78XH(Community):
+    logging.debug("chkB78XH")
+    os.chdir(Community)
+    HDpathS = os.path.join(Community, 'B78XH')
+    HDpathD = os.path.join(Community, 'B78XH-main')
+    HDpathD2 = os.path.join(Community, 'B78XH-dev')
+    HDpathE = os.path.join(Community, 'B78XH-experimental')
+    #check if HD78XH exists and HD78XH is separated new one -v1.1.0
+    if os.path.exists(HDpathS):
+        HDname = "B78XH"
+        HDPath = HDpathS
+        logging.info("HD78XH(Stable) found")
+        print("HD78XH(Stable) found")
+    elif os.path.exists(HDpathD):
+        HDname = "B78XH-main"
+        HDPath = HDpathD
+        logging.info("HD78XH(Development) found")
+        print("HD78XH(Development) found")
+    elif os.path.exists(HDpathD2):
+        HDname = "B78XH-dev"
+        HDPath = HDpathD2
+        logging.info("HD78XH(Development) found")
+        print("HD78XH(Development) found")
+    elif os.path.exists(HDpathE):
+        HDname = "B78XH-experimental"
+        HDPath = HDpathE
+        logging.info("HD78XH(Experimental) found")
+        print("HD78XH(Experimental) found")
+    else:
+        HDname = "NaN"
+        HDPath = "NaN"
+        logging.error("HD78XH not found.")
+        print("HD78XH not found.")
+        return
+    return HDname, HDPath
+
+
+
+#def - extract and copy 787-8
+def Copy788(pydir, Community):
+    with open(os.path.join(pydir, 'settings.jsonc'), mode='r', encoding='utf-8') as config_json:
+        UseGESp = config_L["UseGESp"]
+        UseRRSp = config_L["UseRRSp"]
+    logging.info("Extracting Kuro_B787-8")
+    print("Extracting Kuro_B787-8")
+    zip_f = zipfile.ZipFile(zippath, "r")
+    zip_f.extractall(os.path.join(pydir, 'Temp'))
+    zip_f.close()
+    logging.info("Extracted Kuro_B787-8")
+    print("Extracted Kuro_B787-8")
+    if UseGESp:
+        logging.info("Copying GE Sp to Temp")
+        print("Copying GE Sp to Temp")
+        KuroGE = os.path.join(pydir, 'Temp/Kuro_B787-8/SimObjects/Airplanes/Kuro_B787_8/soundGE')
+        shutil.rmtree(KuroGE, onerror=remove_readonly)
+        shutil.copytree(os.path.join(pydir, 'Sp/GE'), KuroGE, dirs_exist_ok=True)
+        logging.info("Copyied GE Sp to Temp")
+        print("Copyied GE Sp to Temp")
+    if UseRRSp:
+        logging.info("Copying RR Sp to Temp")
+        print("Copying RR Sp to Temp")
+        KuroRR = os.path.join(pydir, 'Temp/Kuro_B787-8/SimObjects/Airplanes/Kuro_B787_8/soundRR')
+        shutil.rmtree(KuroRR, onerror=remove_readonly)
+        shutil.copytree(os.path.join(pydir, 'Sp/RR'), KuroRR, dirs_exist_ok=True)
+        logging.info("Copied RR Sp to Temp")
+        print("Copied RR Sp to Temp")
+    #rewriteJson
+    subprocess.run([os.path.join(pydir, 'MSFSLayoutGenerator.exe'), os.path.join(pydir, 'Temp/Kuro_B787-8/layout.json')])
+    logging.info("Rewrote json")
+    print("Rewrote json")
+    logging.info("Copying Kuro_B787-8 to Community")
+    print("Copying Kuro_B787-8 to Community")
+    shutil.copytree(os.path.join(pydir, 'Temp'), Community, dirs_exist_ok=True)
+    logging.info("Copied Kuro_B787-8 to Community")
+    print("Copied Kuro_B787-8 to Community")
+
+
+#check if 787-8 exists and install
+def check788exist(Community, zippath, KuroPath):
+    if os.path.exists(KuroPath):
+        logging.info("Kuro_B787-8 found in Community folder")
+        print("Kuro_B787-8 found in Community folder")
+        isUpdate = 1
+        if messagebox.askyesno("Kuro_B787-8 Installer", "Kuro_B787-8 found in Community folder.\nDo you want to replace the current one?\n\nSelect Yes to continue.\nSelect No to abort install"):
+            willInstall = 1
+        else:
+            willInstall = 0
+    else:
+        isUpdate = 0
+        willInstall = 1#for temp
+    return willInstall, isUpdate
+
+def install788(Community, zippath, isUpdate, KuroPath, pydir):
+    #check if zip exist
+    if not os.path.exists(zippath):
+        logging.error("Required Installer Component(main.zip) not found.")
+        print("Required Installer Component(main.zip) not found. Download and Extract the installer again.")
+        messagebox.showerror("Kuro_B787-8 Installer - Installation Failed", "Required Installer Component(main.zip) not found.\n(The file is required to install)\n\nDownload and Extract the installer again.")
+        isInstallperformed = 0
+    elif not isUpdate:#install
+        #copy 787-8
+        Copy788(pydir, Community)
+        isInstallperformed = 1
+    else:#update
+        #delete 787-8
+        logging.info("Deleting Kuro_B787-8 in Community")
+        print("Deleting Kuro_B787-8 in Community")
+        shutil.rmtree(KuroPath, onerror=remove_readonly)
+        logging.info("Deleted Kuro_B787-8 in Community")
+        print("Deleted Kuro_B787-8 in Community")
+        #copy 787-8
+        Copy788(pydir, Community)
+        isInstallperformed = 1
+    return isInstallperformed
+
+'''def CopyGESp(Sp1, val_UseGESp):
+    OrgGESpPath = Sp1.get()
+    OrgGESp = os.path.dirname(OrgGESpPath)
+    print(OrgGESpPath)
+    TempGE = os.path.join(pydir, 'Sp/GE')
+    if not os.path.exists(OrgGESpPath):
+        print("GE Sp not found in the folder you specified. GE Sp setting is disabled.")
+        messagebox.showwarning("Kuro_B787-8 Installer ", "GE Sp not found in the folder you specified. GE Sp setting is disabled.")
+        with open(os.path.join(pydir, 'settings.jsonc'), mode='w', encoding='utf-8') as config_json:
+            config_L["GESpDate"] = ""
+            config_L["UseGESp"] = bool(0)
+            json.dump(config_L, config_json)
+        val_UseGESp.set(False)
+        return
+    else:
+        shutil.rmtree(TempGE, onerror=remove_readonly)
+        shutil.copytree(OrgGESp , TempGE, dirs_exist_ok=True)
+    return
+
+def CopyRRSp(Sp2, val_UseRRSp):
+    OrgRRSpPath = Sp2.get()
+    OrgRRSp = os.path.dirname(OrgRRSpPath)
+    print(OrgRRSpPath)
+    TempRR = os.path.join(pydir, 'Sp/RR')
+    if not os.path.exists(OrgRRSpPath):
+        print("RR Sp not found in the folder you specified. RR Sp setting is disabled.")
+        messagebox.showwarning("Kuro_B787-8 Installer ", "RR Sp not found in the folder you specified. RR Sp setting is disabled.")
+        with open(os.path.join(pydir, 'settings.jsonc'), mode='w', encoding='utf-8') as config_json:
+            config_L["RRSpDate"] = ""
+            config_L["UseRRSp"] = bool(0)
+            json.dump(config_L, config_json)
+        val_UseRRSp.set(False)
+        return
+    else:
+        shutil.rmtree(TempRR, onerror=remove_readonly)
+        shutil.copytree(OrgRRSp , TempRR, dirs_exist_ok=True)
+    return'''
+
+
+def CloseSpSetting(sub_set1, val_UseGESp, val_UseRRSp, Sp1, Sp2):
+    sub_set1.destroy()
+    sub_set1.quit()
+    with open(os.path.join(pydir, 'settings.jsonc'), mode='w', encoding='utf-8') as config_json:
+        config_L["UseGESp"] = bool(val_UseGESp.get())
+        config_L["UseRRSp"] = bool(val_UseRRSp.get())
+        json.dump(config_L, config_json)
+    
+    if not Sp1.get() =="" and not Sp2.get() =="":
+        with open(os.path.join(pydir, 'settings.jsonc'), mode='w', encoding='utf-8') as config_json:
+            config_L["GESpDate"] = Sp1.get()
+            config_L["RRSpDate"] = Sp2.get()
+            config_L["UseGESp"] = bool(val_UseGESp.get())
+            config_L["UseRRSp"] = bool(val_UseRRSp.get())
+            json.dump(config_L, config_json)
+    if bool(val_UseGESp.get()):
+        if Sp1.get() == "":
+            print("GE Sp is not specified. Sp setting is disabled.")
+            messagebox.showwarning("Kuro_B787-8 Installer ", "GE Sp is not specified. GE Sp setting is disabled.")
+            with open(os.path.join(pydir, 'settings.jsonc'), mode='w', encoding='utf-8') as config_json:
+                config_L["UseGESp"] = bool(0)
+                json.dump(config_L, config_json)
+            val_UseGESp.set(False)
+    if bool(val_UseRRSp.get()):
+        if Sp2.get() == "":
+            print("RR Sp is not specified. Sp setting is disabled.")
+            messagebox.showwarning("Kuro_B787-8 Installer ", "RR Sp is not specified. RR Sp setting is disabled.")
+            with open(os.path.join(pydir, 'settings.jsonc'), mode='w', encoding='utf-8') as config_json:
+                config_L["UseRRSp"] = bool(0)
+                json.dump(config_L, config_json)
+            val_UseRRSp.set(False)
+
+
+def closesettings(sub_set, val_UseGESp, val_UseRRSp, entry1, Sp1, Sp2):
+    com = tk.StringVar()
+    sub_set.destroy()
+    com.set(entry1.get())
+    logging.debug("override Sp Setting")
+    
+    if not Sp1.get() =="" and not Sp2.get() =="":
+        with open(os.path.join(pydir, 'settings.jsonc'), mode='w', encoding='utf-8') as config_json:
+            config_L["GESpDate"] = Sp1.get()
+            config_L["RRSpDate"] = Sp2.get()
+            config_L["UseGESp"] = bool(val_UseGESp.get())
+            config_L["UseRRSp"] = bool(val_UseRRSp.get())
+            json.dump(config_L, config_json)
+    if bool(val_UseGESp.get()):
+        if Sp1.get() == "":
+            print("GE Sp is not specified. Sp setting is disabled.")
+            messagebox.showwarning("Kuro_B787-8 Installer ", "GE Sp is not specified. GE Sp setting is disabled.")
+            with open(os.path.join(pydir, 'settings.jsonc'), mode='w', encoding='utf-8') as config_json:
+                config_L["UseGESp"] = bool(0)
+                json.dump(config_L, config_json)
+            val_UseGESp.set(False)
+    if bool(val_UseRRSp.get()):
+        if Sp2.get() == "":
+            print("RR Sp is not specified. Sp setting is disabled.")
+            messagebox.showwarning("Kuro_B787-8 Installer ", "RR Sp is not specified. RR Sp setting is disabled.")
+            with open(os.path.join(pydir, 'settings.jsonc'), mode='w', encoding='utf-8') as config_json:
+                config_L["UseRRSp"] = bool(0)
+                json.dump(config_L, config_json)
+            val_UseRRSp.set(False)
+    
+    #Community
+    logging.debug("override Community from entry1")
+    if not com =="":
+        with open(os.path.join(pydir, 'settings.jsonc'), mode='w', encoding='utf-8') as config_json:
+            config_L["CommunityPath"] = com.get()
+            json.dump(config_L, config_json)
+
+#writeSpsetting to json (v2.0.0)
+def writeGESpsetting(val_UseGESp, pydir):
+    with open(os.path.join(pydir, 'settings.jsonc'), mode='w', encoding='utf-8') as config_json:
+        config_L["UseGESp"] = bool(val_UseGESp.get())
+        json.dump(config_L, config_json)
+
+#writeSpsetting to json (v2.0.0)
+def writeRRSpsetting(val_UseRRSp, pydir):
+    with open(os.path.join(pydir, 'settings.jsonc'), mode='w', encoding='utf-8') as config_json:
+        config_L["UseRRSp"] = bool(val_UseRRSp.get())
+        json.dump(config_L, config_json)
+
+
+
+def SpSet(Community, pydir, UseGESp, UseRRSp):
+    ww = root.winfo_screenwidth()
+    wh = root.winfo_screenheight()
+    logging.debug("SpSet")
+    sub_set1 = tk.Toplevel()
+    lw1 = 300
+    lh1 = 175
+    sub_set1.geometry(str(lw1)+"x"+str(lh1)+"+"+str(int(ww/2-lw1/2))+"+"+str(int(wh/2-lh1/2)) )
+    sub_set1.protocol('WM_DELETE_WINDOW', lambda:CloseSpSetting(sub_set1, val_UseGESp, val_UseRRSp, Sp1, Sp2))
+    sub_set1.tk.call('wm', 'iconphoto', sub_set1._w, tk.PhotoImage(data=data))
+    sub_set1.title("Kuro_B787-8 Installer " + version)
+    sub_set1.resizable(0,0)
+    #sub_set1.transient(root)
+    sub_set1.attributes("-topmost", True)
+    sub_set1.lift()
+    sub_set1.focus_force()
+    sub_set1.grab_set()
+    Sp1 = tk.StringVar()
+    Sp2 = tk.StringVar()
+    Sp1.set(GESpDate)
+    Sp2.set(RRSpDate)
+    '''entrySp1 = tk.StringVar()
+    entrySp1.set(Sp1.get())
+    entrySp2 = tk.StringVar()
+    entrySp2.set(Sp2.get())'''
+    val_UseGESp = tk.BooleanVar()
+    val_UseGESp.set(UseGESp)
+    val_UseRRSp = tk.BooleanVar()
+    val_UseRRSp.set(UseRRSp)
+    label_sub = tk.Label(sub_set1, text="Third Party SoundPack settings")
+    label_sub.place(relx = 0.5, rely = 0.1, relwidth = 0.9, anchor = tk.CENTER)
+    def change_state(bool_check, button, date, label):
+        if bool_check.get():
+            date.config(state='normal')
+            button.config(state='normal')
+            label.config(state='normal')
+        else:
+            date.config(state='disabled')
+            button.config(state='disabled')
+            label.config(state='disabled')
+    label_sub1 = ttk.Label(sub_set1, textvariable=Sp1)
+    label_sub1.place(relx = 0.74, rely = 0.375, relwidth = 0.7, anchor = tk.CENTER)
+    label_sub1_2 = ttk.Label(sub_set1, text="GE Last Patched:")
+    label_sub1_2.place(relx = 0.25, rely = 0.375, relwidth = 0.3, anchor = tk.CENTER)
+
+    label_sub2 = ttk.Label(sub_set1, textvariable=Sp2)
+    label_sub2.place(relx = 0.74, rely = 0.7, relwidth = 0.7, anchor = tk.CENTER)
+    label_sub2_2 = ttk.Label(sub_set1, text="RR Last Patched:")
+    label_sub2_2.place(relx = 0.25, rely = 0.7, relwidth = 0.3, anchor = tk.CENTER)
+
+    IDirButton = ttk.Button(sub_set1, text="Select", command=lambda:AskGESp(sub_set1, pydir, Sp1))
+    IDirButton.place(relx = 0.85, rely = 0.375, relwidth = 0.2, anchor = tk.CENTER)
+
+    IDirButton1 = ttk.Button(sub_set1, text="Select", command=lambda:AskRRSp(sub_set1, pydir, Sp2))
+    IDirButton1.place(relx = 0.85, rely = 0.7, relwidth = 0.2, anchor = tk.CENTER)
+    if not val_UseGESp.get():
+        label_sub1.config(state='disabled')
+        IDirButton.config(state='disabled')
+        label_sub1_2.config(state='disabled')
+    
+    if not val_UseRRSp.get():
+        label_sub2.config(state='disabled')
+        IDirButton1.config(state='disabled')
+        label_sub2_2.config(state='disabled')
+
+    rdo1 = ttk.Checkbutton(sub_set1, variable=val_UseGESp, text='Use GE SoundPack', command=lambda:[writeGESpsetting(val_UseGESp, pydir), change_state(val_UseGESp, IDirButton, label_sub1, label_sub1_2)])
+    rdo1.place(relx = 0.05, rely = 0.225, anchor = tk.W)
+    rdo2 = ttk.Checkbutton(sub_set1, variable=val_UseRRSp, text='Use RR SoundPack', command=lambda:[writeRRSpsetting(val_UseRRSp, pydir), change_state(val_UseRRSp, IDirButton1, label_sub2, label_sub2_2)])
+    rdo2.place(relx = 0.05, rely = 0.55, anchor = tk.W)
+
+    IDirButton2 = ttk.Button(sub_set1, text="Close", command=lambda:CloseSpSetting(sub_set1, val_UseGESp, val_UseRRSp, Sp1, Sp2))
+    IDirButton2.place(relx = 0.85, rely = 0.875, relwidth = 0.2, anchor = tk.CENTER)
+    sub_set1.mainloop()
+    return val_UseGESp, val_UseRRSp
+
+#FirstInstall-----------------------------------------------------------------------
+#FirstInstall-----------------------------------------------------------------------
+def FirstInstallFunc(Community, zippath, pydir, UseGESp, UseRRSp, config_L):
+    #message
+    print("Welcome to Kuro_B787-8 Installer")
+    messagebox.showinfo("Welcome to Kuro_B787-8 Installer", "You have 6 steps to go.\n\n1.Select Community Folder\n2.Delete Older Kuro_B787-8 (if exists)\n3.Delete incompatible Camera Mods and B78XH (if exists)\n4.Setting up Custom SoundPack\n5.Install Kuro_B787-8\n6.Convert Liveries (if exists)")
+    '''#com written in cfg or not
+    if Community == "" or not os.path.exists(Community): 
+        #message
+        print("Select your MSFS Community folder in the next pop-up")
+        messagebox.showinfo("Kuro_B787-8 Installer", "Select your MSFS Community folder in the next pop-up")
+        while True:
+            Community = AskCom()
+            if not Community == "":
+                break
+        #write config
+        logging.info("Community Path = " + Community)
+        print("Community Path = " + Community)'''
+    #Always ask Community if it's the first install
+    #message
+    print("Select your MSFS Community folder in the next pop-up")
+    messagebox.showinfo("Kuro_B787-8 Installer", "Select your MSFS Community folder in the next pop-up")
+    while True:
+        Community = AskCom()
+        if not Community == "":
+            break
+    #write config
+    logging.info("Community Path = " + Community)
+    print("Community Path = " + Community)
+    
+    with open(os.path.join(pydir, 'settings.jsonc'), mode='w', encoding='utf-8') as config_json:
+        config_L["CommunityPath"] = Community
+        json.dump(config_L, config_json)
+        logging.debug("set Community (1)")
+    KuroPath = os.path.join(Community, 'Kuro_B787-8')
+    checker788 = check788exist(Community, zippath, KuroPath)
+    willInstall = checker788[0]
+    isUpdate = checker788[1]
+    isDelB788 = 1
+    if willInstall:
+        isDelB788 = 1
+        if os.path.isdir(KuroPath):
+            #delete 787-8
+            logging.info("Deleting Kuro_B787-8 in Community")
+            print("Deleting Kuro_B787-8 in Community")
+            shutil.rmtree(KuroPath, onerror=remove_readonly)
+            logging.info("Deleted Kuro_B787-8 in Community")
+            print("Deleted Kuro_B787-8 in Community")
+    else:
+        isDelB788 = 0
+
+    if not isDelB788:
+        isSetUpDone = 0
+        return isSetUpDone
+    #delete camera mods
+    Cam = chkCam(Community)
+    isCam = Cam[0]
+    Campath = Cam[1]
+    if isCam:
+        if messagebox.askyesno("Kuro_B787-8 Installer", "Unsupported Camera Mod found in Community folder.\nDo you want to delete it?\n\nSelect Yes to continue.\nSelect No to abort install"):
+            #delete Cam Mod
+            logging.info("Deleting Camera Mod in Community")
+            print("Deleting Camera Mod in Community")
+            shutil.rmtree(Campath, onerror=remove_readonly)
+            logging.info("Deleted Camera Mod in Community")
+            print("Deleted Camera Mod in Community")
+        else:
+            isSetUpDone = 0
+            return isSetUpDone
+
+    #delete older B78XH
+    cB78XH = chkB78XH(Community)
+    if cB78XH:
+        HDname = cB78XH[0]
+        HDPath = cB78XH[1]
+        print(HDname)
+        isDelB78XH = 1
+        #chk Stable/Dev or Exp/NaN
+        if HDname == "B78XH" or HDname == "B78XH-main" or HDname == "B78XH-dev":
+            if messagebox.askyesno("Kuro_B787-8 Installer", "Unsupported B78XH found in Community folder.\nDo you want to delete it?\n\nSelect Yes to continue.\nSelect No to abort install"):
+                #delete B78XH
+                logging.info("Deleting B78XH in Community")
+                print("Deleting B78XH in Community")
+                shutil.rmtree(HDPath, onerror=remove_readonly)
+                logging.info("Deleted B78XH in Community")
+                print("Deleted B78XH in Community")
+                isDelB78XH = 1
+            else:
+                isDelB78XH = 0
+                isSetUpDone = 0
+                return isSetUpDone
+        if not isDelB78XH:
+            isSetUpDone = 0
+            return isSetUpDone
+    
+    #Setup Sp
+    SpF = SpSet(Community, pydir, UseGESp, UseRRSp)
+    val_UseGESp = SpF[0]
+    val_UseRRSp = SpF[1]
+    '''
+    #Install 788
+    logging.debug("Install")
+    print("Although the process may appear inactive at times, it is still running. Please wait until the window appears.")
+    with open(os.path.join(pydir, 'settings.jsonc'), mode='r', encoding='utf-8') as config_json:
+        config_L=json.load(config_json)
+        Community = config_L["CommunityPath"]
+        if not Community and not os.path.exists(Community):
+            Community = AskCom()
+            config_L["CommunityPath"] = Community
+            with open(os.path.join(pydir, 'settings.jsonc'), mode='w', encoding='utf-8') as config_json:
+                json.dump(config_L, config_json)
+            print("Community Path = " + Community)
+    if not Community:
+        return
+    KuroPath = os.path.join(Community, 'Kuro_B787-8')
+    checker788 = check788exist(Community, zippath, KuroPath)
+    willInstall = checker788[0]
+    isUpdate = checker788[1]
+    if not willInstall:
+        logging.error("Installation canceled")
+        print("Installation canceled")
+        return
+    #install
+    isInstallperformed = install788(Community, zippath, isUpdate, KuroPath, pydir)
+    if not isInstallperformed:
+        logging.error("Update canceled")
+        print("Update canceled")
+        return
+    #clear Temp folder v2.0.0-
+    logging.debug("clear temp")
+    TempF = os.path.join(pydir, 'Temp')
+    shutil.rmtree(TempF, ignore_errors=True)
+    os.mkdir(TempF)
+    #endI
+    logging.info('Installation/Update has been completed')
+    print('Installation/Update has been completed')
+    messagebox.showinfo("Kuro_B787-8 Installer", "Installation/Update has been completed.")
+    os.chdir(pydir)
+    #Convert Liveries
+    logging.debug("livery")
+    with open(os.path.join(pydir, 'settings.jsonc'), mode='r', encoding='utf-8') as config_json:
+        config_L=json.load(config_json)
+        Community = config_L["CommunityPath"]
+        if not Community and not os.path.exists(Community):
+            Community = AskCom()
+            config_L["CommunityPath"] = Community
+            with open(os.path.join(pydir, 'settings.jsonc'), mode='w', encoding='utf-8') as config_json:
+                json.dump(config_L, config_json)
+            print("Community Path = " + Community)
+    if not Community:
+        return
+    isConvertOnly = 1
+    isUpdate = 0
+    isConverted = liveryconv(Community, isUpdate, root)
+    if not isConverted:
+        return
+    else:
+        endL()
+    '''
+    #write FirstInstall is done
+    with open(os.path.join(pydir, 'settings.jsonc'), mode='w', encoding='utf-8') as config_json:
+        config_L["isFirstInstall"] = False
+        json.dump(config_L, config_json)
+    
+    isSetUpDone = 1
+    isFirstInstallT = 1
+    return isSetUpDone, isFirstInstallT
+
+isFirstInstallT=0
+if isFirstInstall:
+    FirstInstallFuncT = FirstInstallFunc(Community, zippath, pydir, UseGESp, UseRRSp, config_L)
+    if not FirstInstallFuncT:
+        logging.info('Setup has been automatically canceled.')
+        print('Setup has been automatically canceled.')
+        messagebox.showinfo("Kuro_B787-8 Installer", "Setup has been automatically canceled.")
+        close()
+    isSetUpDone = FirstInstallFuncT[0]
+    isFirstInstallT = FirstInstallFuncT[1]
+    if not isSetUpDone:
+        logging.info('Setup has been automatically canceled.')
+        print('Setup has been automatically canceled.')
+        messagebox.showinfo("Kuro_B787-8 Installer", "Setup has been automatically canceled.")
+        close()
+
+
+
+
+
+
+
+
+
+
+'''
 #com written in cfg or not
 if Community == "" or not os.path.exists(Community): 
     #message
@@ -174,45 +821,64 @@ if Community == "" or not os.path.exists(Community):
     Community = AskCom()
     logging.info("Community Path = " + Community)
     print("Community Path = " + Community)
-    with open(os.path.join(pydir, 'installer.cfg'), mode='w', encoding='utf-8') as config:
-        config.write(Community)
-        logging.debug("set Community (1)")
-
+    with open(os.path.join(pydir, 'settings.jsonc'), mode='w', encoding='utf-8') as config_json:
+        config_L["CommunityPath"] = Community
+        json.dump(config_L, config_json)
+        logging.debug("set Community (1)")'''
 
 #menu
 def info():
-    messagebox.showinfo("Kuro_B787-8 Installer " + version, "This program is the installer/updater of Kuro_B787-8 for Microsoft Flight Simulator.\n\nRequired Contents :\nMSFS Premium Delux Version,\nHeavyDivision's B78XH(any version)\n\nCreator : Kurorin(@kuro_x#4595)\nhttps://flightsim.to/profile/Kurorin")
+    messagebox.showinfo("Kuro_B787-8 Installer " + version, "This program is the installer/updater of Kuro_B787-8 for Microsoft Flight Simulator.\n\nRequired Contents :\nMSFS Premium Delux Version\n\nCreator : Kurorin(@kuro_x#4595)\nhttps://flightsim.to/profile/Kurorin")
     logging.debug("Info")
+
 def faq():
     webbrowser.open(faq_url)
     logging.debug("faq")
-def AskCom0(entry1, sub_set, pydir):
+
+def sb():
+    webbrowser.open(sb_url)
+    logging.debug("sb")
+def fsto():
+    webbrowser.open(fsto_url)
+    logging.debug("fsto")
+
+def AskCom0(sub_set, pydir, entry1):
     sub_set.attributes("-topmost", False)
-    Community = AskCom()
+    Community = AskCom1(sub_set)
     if not Community =="":
         entry1.set(Community)
         logging.debug("Ask Community")
-        with open(os.path.join(pydir, 'installer.cfg'), mode='w', encoding='utf-8') as config:
-            config.write(Community)
+        with open(os.path.join(pydir, 'settings.jsonc'), mode='w', encoding='utf-8') as config_json:
+            config_L["CommunityPath"] = Community
+            json.dump(config_L, config_json)
             logging.info("write Community to cfg")
         logging.info("Community Path = " + Community)
         print("Community Path = " + Community)
     sub_set.attributes("-topmost", True)
-def closesettngs(entry1, sub_set):
-    sub_set.destroy()
-    com.set(entry1.get())
-    logging.debug("override Community from entry1")
-    if not com =="":
-        with open(os.path.join(pydir, 'installer.cfg'), mode='w', encoding='utf-8') as config:
-            config.write(com.get())
 
-def settings(com, Commnuity, root):
+
+
+
+
+
+
+def settings(com, Community, root, pydir, UseGESp, UseRRSp, GESpDate, RRSpDate):
+    with open(os.path.join(pydir, 'settings.jsonc'), mode='r', encoding='utf-8') as config_json:
+        config_L=json.load(config_json)
+        Community = config_L["CommunityPath"]
+        UseGESp = config_L["UseGESp"]
+        GESpDate = config_L["GESpDate"]
+        UseRRSp = config_L["UseRRSp"]
+        RRSpDate = config_L["RRSpDate"]
+        isFirstInstall = config_L["isFirstInstall"]
+        logging.debug("read Community from cfg")
+        print("Community Path = " + Community)
     logging.debug("Settings")
     sub_set = tk.Toplevel()
     lw1 = 300
-    lh1 = 100
+    lh1 = 200
     sub_set.geometry(str(lw1)+"x"+str(lh1)+"+"+str(int(ww/2-lw1/2))+"+"+str(int(wh/2-lh1/2)) )
-    sub_set.protocol('WM_DELETE_WINDOW', lambda:closesettngs(entry1, sub_set))
+    sub_set.protocol('WM_DELETE_WINDOW', lambda:closesettings(sub_set, val_UseGESp, val_UseRRSp, entry1, Sp1, Sp2))
     sub_set.tk.call('wm', 'iconphoto', sub_set._w, tk.PhotoImage(data=data))
     sub_set.resizable(0,0)
     sub_set.transient(root)
@@ -221,46 +887,88 @@ def settings(com, Commnuity, root):
     sub_set.focus_force()
     sub_set.grab_set()
     entry1 = tk.StringVar()
-    entry1.set(com.get())
+    entry1.set(Community)
+    com.set(Community)
+    Sp1 = tk.StringVar()
+    Sp2 = tk.StringVar()
+    Sp1.set(GESpDate)
+    Sp2.set(RRSpDate)
+    '''entrySp1 = tk.StringVar()
+    entrySp1.set(Sp1.get())
+    entrySp2 = tk.StringVar()
+    entrySp2.set(Sp2.get())'''
+    val_UseGESp = tk.BooleanVar()
+    val_UseGESp.set(UseGESp)
+    val_UseRRSp = tk.BooleanVar()
+    val_UseRRSp.set(UseRRSp)
+
+    label_sub0 = tk.Label(sub_set, text="Settings")
+    label_sub0.place(relx = 0.5, rely = 0.075, relwidth = 0.9, anchor = tk.CENTER)
     label_sub = tk.Label(sub_set, text="Communty Path :")
-    label_sub.place(relx = 0.5, rely = 0.2, relwidth = 0.9, anchor = tk.CENTER)
+    label_sub.place(relx = 0.5, rely = 0.175, relwidth = 0.9, anchor = tk.CENTER)
     IDirEntry = ttk.Entry(sub_set, textvariable=entry1)
-    IDirEntry.place(relx = 0.4, rely = 0.45, relwidth = 0.7, anchor = tk.CENTER)
-    IDirButton = ttk.Button(sub_set, text="Select", command=lambda:AskCom0(entry1, sub_set, pydir))
-    IDirButton.place(relx = 0.85, rely = 0.45, relwidth = 0.2, anchor = tk.CENTER)
-    IDirButton1 = ttk.Button(sub_set, text="Close", command=lambda:closesettngs(entry1, sub_set))
-    IDirButton1.place(relx = 0.85, rely = 0.75, relwidth = 0.2, anchor = tk.CENTER)
-    '''
-    #combo
-    logOpt = ["DEBUG", "INFO"]
-    logTex = tk.StringVar()
-    label_comb = tk.Label(sub_set, text="Log Level :")
-    label_comb.place(relx = 0.15, rely = 0.75, relwidth = 0.3, anchor = tk.CENTER)
-    combobox = ttk.Combobox(sub_set, values = logOpt, textvariable = logTex)
-    combobox.set("DEBUG")
-    combobox.place(relx = 0.35, rely = 0.75, relwidth = 0.2, anchor = tk.CENTER)
-    '''
-def install(com, patchpath, HDpatchpath, HDpatchpath2, cfgpath, cfgpath0):
+    IDirEntry.place(relx = 0.4, rely = 0.275, relwidth = 0.7, anchor = tk.CENTER)
+    IDirButton = ttk.Button(sub_set, text="Select", command=lambda:AskCom0(sub_set, pydir, entry1))
+    IDirButton.place(relx = 0.85, rely = 0.275, relwidth = 0.2, anchor = tk.CENTER)
+
+    label_sub1 = ttk.Label(sub_set, textvariable=Sp1)
+    label_sub1.place(relx = 0.74, rely = 0.525, relwidth = 0.7, anchor = tk.CENTER)
+    label_sub1_2 = ttk.Label(sub_set, text="GE Last Patched:")
+    label_sub1_2.place(relx = 0.25, rely = 0.525, relwidth = 0.3, anchor = tk.CENTER)
+    IDirButton1 = ttk.Button(sub_set, text="Select", command=lambda:AskGESp(sub_set, pydir, Sp1))
+    IDirButton1.place(relx = 0.85, rely = 0.525, relwidth = 0.2, anchor = tk.CENTER)
+    if not val_UseGESp.get():
+        label_sub1.config(state='disabled')
+        IDirButton1.config(state='disabled')
+        label_sub1_2.config(state='disabled')
+    def change_state(bool_check, button, date, label):
+        if bool_check.get():
+            date.config(state='normal')
+            button.config(state='normal')
+            label.config(state='normal')
+        else:
+            date.config(state='disabled')
+            button.config(state='disabled')
+            label.config(state='disabled')
+    rdo1 = ttk.Checkbutton(sub_set, variable=val_UseGESp, text='Use GE SoundPack', command=lambda:[writeGESpsetting(val_UseGESp, pydir), change_state(val_UseGESp, IDirButton1, label_sub1, label_sub1_2)])
+    rdo1.place(relx = 0.04, rely = 0.4, anchor = tk.W)
+
+    label_sub2 = ttk.Label(sub_set, textvariable=Sp2)
+    label_sub2.place(relx = 0.74, rely = 0.775, relwidth = 0.7, anchor = tk.CENTER)
+    label_sub2_2 = ttk.Label(sub_set, text="RR Last Patched:")
+    label_sub2_2.place(relx = 0.25, rely = 0.775, relwidth = 0.3, anchor = tk.CENTER)
+    IDirButton2 = ttk.Button(sub_set, text="Select", command=lambda:AskRRSp(sub_set, pydir, Sp2))
+    IDirButton2.place(relx = 0.85, rely = 0.775, relwidth = 0.2, anchor = tk.CENTER)
+    if not val_UseRRSp.get():
+        label_sub2.config(state='disabled')
+        IDirButton2.config(state='disabled')
+        label_sub2_2.config(state='disabled')
+    rdo2 = ttk.Checkbutton(sub_set, variable=val_UseRRSp, text='Use RR SoundPack', command=lambda:[writeRRSpsetting(val_UseRRSp, pydir), change_state(val_UseRRSp, IDirButton2, label_sub2, label_sub2_2)])
+    rdo2.place(relx = 0.04, rely = 0.65, anchor = tk.W)
+    IDirButton3 = ttk.Button(sub_set, text="Close", command=lambda:closesettings(sub_set, val_UseGESp, val_UseRRSp, entry1, Sp1, Sp2))
+    IDirButton3.place(relx = 0.85, rely = 0.9, relwidth = 0.2, anchor = tk.CENTER)
+    sub_set.mainloop()
+
+
+def install(com, UseGESp, UseRRSp, root):
     logging.debug("Install")
-    with open(os.path.join(pydir, 'installer.cfg'), mode='r', encoding='utf-8') as config:
-        configL = config.read().splitlines()
-        if configL and os.path.exists(configL[0]):
-            Community = configL[0]
+    root.withdraw()
+    print("\n\n>>Although the process may appear inactive at times, it is still running. Please wait until the window appears.<<\n\n")
+    with open(os.path.join(pydir, 'settings.jsonc'), mode='r', encoding='utf-8') as config_json:
+        config_L=json.load(config_json)
+        Community = config_L["CommunityPath"]
+        if Community and os.path.exists(Community):
             com.set(Community)
         else:
             Community = AskCom()
-            with open(os.path.join(pydir, 'installer.cfg'), mode='w', encoding='utf-8') as config:
-                config.write(Community)
+            config_L["CommunityPath"] = Community
+            with open(os.path.join(pydir, 'settings.jsonc'), mode='w', encoding='utf-8') as config_json:
+                json.dump(config_L, config_json)
             com.set(Community)
+            print("Community Path = " + Community)
     if not Community:
+        root.deiconify()
         return
-    ComInfo = SetCom(Community)
-    if not ComInfo:
-        return
-    HDname = ComInfo[0]
-    HDPath = ComInfo[1]
-    isHDB78XHnew = ComInfo[2]
-    #check788exist(v1.1.3)
     KuroPath = os.path.join(Community, 'Kuro_B787-8')
     checker788 = check788exist(Community, zippath, KuroPath)
     willInstall = checker788[0]
@@ -268,149 +976,80 @@ def install(com, patchpath, HDpatchpath, HDpatchpath2, cfgpath, cfgpath0):
     if not willInstall:
         logging.error("Installation canceled")
         print("Installation canceled")
+        root.deiconify()
         return
-    if isHDB78XHnew:
-        logging.info("separated B78XH")
-        print("separated B78XH")
-        isConvertOnly = 0
-        #checklivery(v1.1.3)
-        logging.debug("checklivery")
-        isLivConverted = liveryconv(Community, cfgpath, isConvertOnly, isUpdate)
-        if not isLivConverted:
-            endC()
-            return
-        else:#install
-            isInstallperformed = install788(Community, zippath, isUpdate, KuroPath)
-            if not isInstallperformed:
-                logging.error("Update canceled")
-                print("Update canceled")
-                return
-            isInstallperformed = PatchnewHD(isHDB78XHnew, HDpatchpath, HDpatchpath2, Community)
-            if not isInstallperformed:
-                logging.error("Update canceled")
-                print("Update canceled")
-                return
-            isInstallperformed = engAnim(Community, HDname, patchpath)
-            if not isInstallperformed:
-                logging.error("Update canceled")
-                print("Update canceled")
-                return
-            isInstallperformed = fmcUpdate(HDPath, Community, isHDB78XHnew)
-            if not isInstallperformed:
-                logging.error("Update canceled")
-                print("Update canceled")
-                return
-            convert(Community, cfgpath) 
-    else:
-        logging.info("non-separated B78XH")
-        print("non-separated B78XH")
-        isConvertOnly = 0
-        #install
-        isLivConverted = liveryconv0(Community, cfgpath0, isConvertOnly, isUpdate)
-        isInstallperformed = install788(Community, zippath, isUpdate, KuroPath)
-        if not isInstallperformed:
-            logging.error("Update canceled")
-            print("Update canceled")
-            return
-        isInstallperformed = PatchnewHD(isHDB78XHnew, HDpatchpath, HDpatchpath2, Community)
-        if not isInstallperformed:
-            logging.error("Update canceled")
-            print("Update canceled")
-            return
-        isInstallperformed = engAnim(Community, HDname, patchpath)
-        if not isInstallperformed:
-            logging.error("Update canceled")
-            print("Update canceled")
-            return
-        isInstallperformed = fmcUpdate(HDPath, Community, isHDB78XHnew)
-        if not isInstallperformed:
-            logging.error("Update canceled")
-            print("Update canceled")
-            return
-        convert0(Community, cfgpath0) 
+    #install
+    isInstallperformed = install788(Community, zippath, isUpdate, KuroPath, pydir)
+    if not isInstallperformed:
+        logging.error("Update canceled")
+        print("Update canceled")
+        root.deiconify()
+        return
+    #clear Temp folder v2.0.0-
+    logging.debug("clear temp")
+    TempF = os.path.join(pydir, 'Temp')
+    shutil.rmtree(TempF, ignore_errors=True)
+    os.mkdir(TempF)
     endI()
+    root.deiconify()
 
 
-def update(com, patchpath, HDpatchpath, HDpatchpath2):
-    logging.debug("Update")
-    with open(os.path.join(pydir, 'installer.cfg'), mode='r', encoding='utf-8') as config:
-        configL = config.read().splitlines()
-        if configL and os.path.exists(configL[0]):
-            Community = configL[0]
-            com.set(Community)
-        else:
-            Community = AskCom()
-            with open(os.path.join(pydir, 'installer.cfg'), mode='w', encoding='utf-8') as config:
-                config.write(Community)
-            com.set(Community)
-    if not Community:
-        return
-    ComInfo = SetCom(Community)
-    if not ComInfo:
-        return
-    HDname = ComInfo[0]
-    HDPath = ComInfo[1]
-    isHDB78XHnew = ComInfo[2]
-    isInstallperformed = fmcUpdate(HDPath, Community, isHDB78XHnew)
-    if not isInstallperformed:
-        logging.error("Update canceled")
-        print("Update canceled")
-        return
-    isInstallperformed = PatchnewHD(isHDB78XHnew, HDpatchpath, HDpatchpath2, Community)
-    if not isInstallperformed:
-        logging.error("Update canceled")
-        print("Update canceled")
-        return
-    isInstallperformed = engAnim(Community, HDname, patchpath)
-    if not isInstallperformed:
-        logging.error("Update canceled")
-        print("Update canceled")
-        return
-    endF()
 
-def livery(com, cfgpath, cfgpath0):
+def livery(com, root):
+    root.withdraw()
     logging.debug("livery")
-    with open(os.path.join(pydir, 'installer.cfg'), mode='r', encoding='utf-8') as config:
-        configL = config.read().splitlines()
-        if configL and os.path.exists(configL[0]):
-            Community = configL[0]
+    with open(os.path.join(pydir, 'settings.jsonc'), mode='r', encoding='utf-8') as config_json:
+        config_L=json.load(config_json)
+        Community = config_L["CommunityPath"]
+        if Community and os.path.exists(Community):
             com.set(Community)
         else:
             Community = AskCom()
-            with open(os.path.join(pydir, 'installer.cfg'), mode='w', encoding='utf-8') as config:
-                config.write(Community)
+            config_L["CommunityPath"] = Community
+            with open(os.path.join(pydir, 'settings.jsonc'), mode='w', encoding='utf-8') as config_json:
+                json.dump(config_L, config_json)
             com.set(Community)
+            print("Community Path = " + Community)
     if not Community:
+        root.deiconify()
         return
-    ComInfo = SetCom(Community)
-    if not ComInfo:
-        return
-    HDname = ComInfo[0]
-    HDPath = ComInfo[1]
-    isHDB78XHnew = ComInfo[2]
-    if not isHDB78XHnew:
-        '''
-        isConvertOnly = 1
-        isUpdate = 0
-        isLivConverted = liveryconv0(Community, cfgpath0, isConvertOnly, isUpdate)
-        endL()
-        '''
-        logging.warning("Installed B78XH is not separeted one.")
-        print("Installed B78XH is not separeted one. No need to convert liveries.")
-        messagebox.showwarning("Kuro_B787-8 Installer ", "The installed B78XH is not the one separeted from the Default B787-10.  No need to convert liveries.")
+    isConvertOnly = 1
+    isUpdate = 0
+    isConverted = liveryconv(Community, isUpdate, root)
+    if not isConverted:
+        root.deiconify()
         return
     else:
-        isConvertOnly = 1
-        isUpdate = 0
-        isLivConverted = liveryconv(Community, cfgpath, isConvertOnly, isUpdate)
-        if not isLivConverted:
-            return
-        else:
-            endL()
-        
-def close():
-    logging.debug("close")
-    sys.exit()
+        endL()
+    root.deiconify()
+
+#clear Temp folder v2.0.0-
+logging.debug("clear temp")
+TempF = os.path.join(pydir, 'Temp')
+shutil.rmtree(TempF, ignore_errors=True)
+os.mkdir(TempF)
+
+#check Sp exists  v2.0.0-
+logging.debug("check Sp")
+SpGEPath = os.path.join(pydir, 'Sp/GE/sound.xml')
+SpRRPath = os.path.join(pydir, 'Sp/RR/sound.xml')
+
+if UseGESp:
+    if not os.path.isfile(SpGEPath):
+        with open(os.path.join(pydir, 'settings.jsonc'), mode='w', encoding='utf-8') as config_json:
+            config_L["GESpDate"] = ""
+            config_L["UseGESp"] = bool(0)
+            json.dump(config_L, config_json)
+        print("GE Sp not found. GE Sp setting is disabled.")
+
+if UseRRSp:
+    if not os.path.isfile(SpRRPath):
+        with open(os.path.join(pydir, 'settings.jsonc'), mode='w', encoding='utf-8') as config_json:
+            config_L["RRSpDate"] = ""
+            config_L["UseRRSp"] = bool(0)
+            json.dump(config_L, config_json)
+        print("RR Sp not found. RR Sp setting is disabled.")
+
 
 logging.debug("root")
 root.title("Kuro_B787-8 Installer " + version)
@@ -426,377 +1065,337 @@ com.set(Community)
 men = tk.Menu(root) 
 root.config(menu=men)
 root.deiconify()
-
 menu_file1 = tk.Menu(root, tearoff=0)
 menu_file2 = tk.Menu(root, tearoff=0)
 menu_file3 = tk.Menu(root, tearoff=0)
 men.add_cascade(label='Settings', menu=menu_file1) 
-menu_file1.add_command(label='Settings', command=lambda:settings(com, Community, root)) 
+menu_file1.add_command(label='Settings', command=lambda:settings(com, Community, root, pydir, UseGESp, UseRRSp, GESpDate, RRSpDate)) 
 menu_file1.add_separator() 
 menu_file1.add_command(label='Close', command=close)
-men.add_cascade(label='FAQ', menu=menu_file2) 
-menu_file2.add_command(label='FAQ', command=faq)
+men.add_cascade(label='Links', menu=menu_file2)
+menu_file2.add_command(label='FAQ Page', command=faq)
+menu_file2.add_command(label='SimBrief Profile', command=sb)
+menu_file2.add_command(label='Flightsim.to Page', command=fsto)
 men.add_cascade(label='Info', menu=menu_file3) 
 menu_file3.add_command(label='Info', command=info)
 
-button1 = ttk.Button(root, text="Install/Update B787-8", command=lambda:install(com, patchpath, HDpatchpath, HDpatchpath2, cfgpath, cfgpath0))
+button1 = ttk.Button(root, text="Install/Update B787-8", command=lambda:install(com, UseGESp, UseRRSp, root))
 button1.place(relx = 0.5, rely = 0.2, relwidth = 0.8, anchor = tk.CENTER)
-button2 = ttk.Button(root, text="Update Only FMC/Anim files", command=lambda:update(com, patchpath, HDpatchpath, HDpatchpath2))
+button2 = ttk.Button(root, text="Convert Livery (From ~v1.1.6)", command=lambda:livery(com, root))
 button2.place(relx = 0.5, rely = 0.4, relwidth = 0.8, anchor = tk.CENTER)
-button3 = ttk.Button(root, text="Convert Livery (For B78XH Soft Fork User)", command=lambda:livery(com, cfgpath, cfgpath0))
-button3.place(relx = 0.5, rely = 0.6, relwidth = 0.8, anchor = tk.CENTER)
+button3 = ttk.Button(root, text="Settings", command=lambda:settings(com, Community, root, pydir, UseGESp, UseRRSp, GESpDate, RRSpDate))
+button3.place(relx = 0.3, rely = 0.6, relwidth = 0.4, anchor = tk.CENTER)
+button4 = ttk.Button(root, text="FAQ", command=faq)
+button4.place(relx = 0.7, rely = 0.6, relwidth = 0.4, anchor = tk.CENTER)
 label1 = ttk.Label(root, text="Kurorin(@kuro_x#4595)")
 label1.place(relx = 0.5, rely = 0.8, anchor = tk.CENTER)
 
 
 
+def closelivconv(convroot):
+    convroot.destroy()
+    convroot.quit()
+    return
 
+def convroot(list_name, list_airline, list_creator, root, list_isv2):
+    ww = root.winfo_screenwidth()
+    wh = root.winfo_screenheight()
+    convroot = tk.Toplevel()
+    lw1 = 970
+    lh1 = 400
+    convroot.geometry(str(lw1)+"x"+str(lh1)+"+"+str(int(ww/2-lw1/2))+"+"+str(int(wh/2-lh1/2)) )
+    convroot.tk.call('wm', 'iconphoto', convroot._w, tk.PhotoImage(data=data))
+    convroot.resizable(0,0)
+    #convroot.transient(root)
+    convroot.attributes("-topmost", True)
+    convroot.lift()
+    convroot.focus_force()
+    convroot.grab_set()
+    convroot.title('Engine Variant Selector')
+    convroot.geometry('970x400')
+    convroot.protocol('WM_DELETE_WINDOW', lambda:closelivconv(convroot))
+    num_list = len(list_name)
+    canvas = tk.Canvas(convroot,width=930,height=350,bg='white')
+    canvas.grid(row=1,rowspan=num_list,column=0,columnspan=5)
+    vbar=tk.ttk.Scrollbar(convroot,orient=tk.VERTICAL)
+    vbar.grid(row=1,rowspan=7,column=5,sticky='ns')
+    vbar.config(command=canvas.yview)
+    canvas.config(yscrollcommand=vbar.set)
+    sc_hgt=int(300/6*(num_list+1))
+    canvas.config(scrollregion=(0,0,1000,sc_hgt))
+    frame = tk.Frame(canvas,bg='white')
+    canvas.create_window((0,0),window=frame,anchor=tk.NW,width=canvas.cget('width'))
+    e0=tk.Label(frame,width=4,text='GE',background='white')
+    e0.grid(row=1,column=0,padx=0,pady=0,ipadx=0,ipady=0)
+    e01=tk.Label(frame,width=4,text='RR',background='white')
+    e01.grid(row=1,column=1,padx=0,pady=0,ipadx=0,ipady=0)
+    e4=tk.Label(frame,width=20,text='is Converted Before',background='white')
+    e4.grid(row=1,column=2,padx=0,pady=0,ipadx=0,ipady=0)
+    e1=tk.Label(frame,width=50,text='Name',background='white')
+    e1.grid(row=1,column=3,padx=0,pady=0,ipadx=0,ipady=0)
+    e2=tk.Label(frame,width=15,text='Airline',background='white')
+    e2.grid(row=1,column=4,padx=0,pady=0,ipadx=0,ipady=0)
+    e3=tk.Label(frame,width=35,text='Creator',background='white')
+    e3.grid(row=1,column=5,padx=0,pady=0,ipadx=0,ipady=0)
 
-
-
-
-#Find HD78XH
-def setB78XH(Community):
-    logging.debug("setB78XH")
-    os.chdir(Community)
-    HDpathS = os.path.join(Community, 'B78XH\html_ui\Pages\VCockpit\Instruments\Airliners')
-    HDpathD = os.path.join(Community, 'B78XH-main\html_ui\Pages\VCockpit\Instruments\Airliners')
-    HDpathD2 = os.path.join(Community, 'B78XH-dev\html_ui\Pages\VCockpit\Instruments\Airliners')
-    HDpathE = os.path.join(Community, 'B78XH-experimental\html_ui\Pages\VCockpit\Instruments\Airliners')
-    #check if HD78XH exists and HD78XH is separated new one -v1.1.0
-    if os.path.exists(HDpathS):
-        if os.path.exists(os.path.join(HDpathS, 'Heavy-Division-B78XH-mod\FMC')):
-            isHDB78XHnew = True
-            HDPath = os.path.join(HDpathS, 'Heavy-Division-B78XH-mod\FMC')
-        else:
-            HDPath = os.path.join(HDpathS, 'B787_10\FMC')
-            isHDB78XHnew = False
-        HDname = "B78XH"
-        logging.info("HD78XH(Stable) found")
-        print("HD78XH(Stable) found")
-    elif os.path.exists(HDpathD):
-        if os.path.exists(os.path.join(HDpathD, 'Heavy-Division-B78XH-mod\FMC')):
-            HDPath = os.path.join(HDpathD, 'Heavy-Division-B78XH-mod\FMC')
-            isHDB78XHnew = True
-        else:
-            HDPath = os.path.join(HDpathD, 'B787_10\FMC')
-            isHDB78XHnew = False
-        HDname = "B78XH-main"
-        logging.info("HD78XH(Development) found")
-        print("HD78XH(Development) found")
-    elif os.path.exists(HDpathD2):
-        if os.path.exists(os.path.join(HDpathD2, 'Heavy-Division-B78XH-mod\FMC')):
-            HDPath = os.path.join(HDpathD2, 'Heavy-Division-B78XH-mod\FMC')
-            isHDB78XHnew = True
-        else:
-            HDPath = os.path.join(HDpathD2, 'B787_10\FMC')
-            isHDB78XHnew = False
-        HDname = "B78XH-dev"
-        logging.info("HD78XH(Development) found")
-        print("HD78XH(Development) found")
-    elif os.path.exists(HDpathE):
-        if os.path.exists(os.path.join(HDpathE, 'Heavy-Division-B78XH-mod\FMC')):
-            HDPath = os.path.join(HDpathE, 'Heavy-Division-B78XH-mod\FMC')
-            isHDB78XHnew = True
-        else:
-            HDPath = os.path.join(HDpathE, 'B787_10\FMC')
-            isHDB78XHnew = False
-        HDname = "B78XH-experimental"
-        logging.info("HD78XH(Experimental) found")
-        print("HD78XH(Experimental) found")
-    else:
-        logging.error("HeavyDivision's B78XH not found.")
-        print("HeavyDivision's B78XH not found. Install it and try again.")
-        messagebox.showerror("Kuro_B787-8 Installer - Installation Failed", "HeavyDivision's B78XH not found. Install it and try again.")
+    isGE =[]
+    isGEv = tk.StringVar()
+    def exit_list(convroot, frame):
+        values = [x.get() for x in isGE]
+        isGEv.set(','.join(map(str, values)))
+        frame.destroy()
+        convroot.destroy()
+        convroot.quit()
         return
-    logging.info("isHDB78XHnew =" + str(isHDB78XHnew))
-    print("isHDB78XHnew =" + str(isHDB78XHnew))
-    return HDname, HDPath, isHDB78XHnew
-def SetCom(Community):
-    logging.debug("SetCom")
-    cB78XH = setB78XH(Community)
-    if not cB78XH:
-        return
-    HDname = cB78XH[0]
-    HDPath = cB78XH[1]
-    isHDB78XHnew = cB78XH[2]
-    return(HDname, HDPath, isHDB78XHnew)
+    allSelectButton = tk.Button(convroot,text=' Convert ',command=lambda:exit_list(convroot, frame))
+    allSelectButton.grid(row=num_list+2,column=4)
+    allSelectButton1 = tk.Button(convroot,text=' Cancel ', command=lambda:closelivconv(convroot))
+    allSelectButton1.grid(row=num_list+2,column=3)
 
+    n=0
 
-
-#def - extract and copy 787-8
-def Copy788():
-    logging.info("Copying Kuro_B787-8 to Community")
-    print("Copying Kuro_B787-8 to Community")
-    zip_f = zipfile.ZipFile(zippath, "r")
-    zip_f.extractall(Community)
-    zip_f.close()
-    logging.info("Copied Kuro_B787-8 to Community")
-    print("Copied Kuro_B787-8 to Community")
-
-#check if 787-8 exists and install
-def check788exist(Community, zippath, KuroPath):
-    if os.path.exists(KuroPath):
-        logging.info("Kuro_B787-8 found in Community folder")
-        print("Kuro_B787-8 found in Community folder")
-        isUpdate = 1
-        if messagebox.askyesno("Kuro_B787-8 Installer", "Kuro_B787-8 found in Community folder.\nDo you want to replace the current one?\n\nSelect Yes to continue.\nSelect No to abort reinstall"):
-            willInstall = 1
+    for i in list_name:
+        if n%2==0:
+            color='#e8fff7'
         else:
-            willInstall = 0
-    else:
-        isUpdate = 0
-        willInstall = 1#for temp
-    return willInstall, isUpdate
-
-def install788(Community, zippath, isUpdate, KuroPath):
-    #check if zip exist
-    if not os.path.exists(zippath):
-        logging.error("Required Installer Component(main.zip) not found.")
-        print("Required Installer Component(main.zip) not found. Download and Extract the installer again.")
-        messagebox.showerror("Kuro_B787-8 Installer - Installation Failed", "Required Installer Component(main.zip) not found.\n(The file is required to install)\n\nDownload and Extract the installer again.")
-        isInstallperformed = 0
-    elif not isUpdate:#install
-        #copy 787-8
-        Copy788()
-        isInstallperformed = 1
-    else:#update
-        #delete 787-8
-        logging.info("Deleting Kuro_B787-8 in Community")
-        print("Deleting Kuro_B787-8 in Community")
-        shutil.rmtree(KuroPath)
-        logging.info("Deleted Kuro_B787-8 in Community")
-        print("Deleted Kuro_B787-8 in Community")
-        #copy 787-8
-        Copy788()
-        isInstallperformed = 1
-    return isInstallperformed
-
-
-
-
-#check if not HD78XH is newer (separated) one - v1.1.0
-#def - extract and copy new HD patch - v1.1.0
-def PatchnewHD(isHDB78XHnew, HDpatchpath, HDpatchpath2, Community):
-    if isHDB78XHnew:
-        logging.debug("patch newHD")
-        if not os.path.exists(HDpatchpath):
-            logging.info("separated HD78XH")
-            print("separated HD78XH")
-            logging.error("Required Installer Component(newHD.zip) not found.")
-            print("Required Installer Component(newHD.zip) not found. Download and Extract the installer again.")
-            messagebox.showerror("Kuro_B787-8 Installer - Installation Failed", "newHD.zip not found.\n\nDownload and Extract the installer again.")
-            isInstallperformed = 0
+            color='white'
+        isGE.append(tk.IntVar())
+        #isGE[n].set(0)
+        ##
+        #read list
+        with open(os.path.join(pydir, 'icao_ENG.jsonc'), "r", encoding="utf-8") as listfileT:
+            list = listfileT.read()
+        re_list = re.sub(r'/\*[\s\S]*?\*/|//.*', '', list)
+        listB = json.loads(re_list)
+        logging.debug("read icao list")
+        if list_airline[n] in listB:
+            icao = list_airline[n]
+            isGE[n].set(listB[icao])
         else:
-            logging.info("separated HD78XH")
-            print("separated HD78XH")
-            logging.info("Patching files for newer (separated) B78XH")
-            print("Patching files for newer (separated) B78XH")
-            patch_f1 = zipfile.ZipFile(HDpatchpath, "r")
-            patch_f1.extractall(Community)
-            patch_f1.close()
-            logging.info("Patched files for newer (separated) B78XH")
-            print("Patched files for newer (separated) B78XH")
-            isInstallperformed = 1
-    else:
-        logging.debug("patch oldHD")
-        if not os.path.exists(HDpatchpath2):
-            logging.info("non-separated HD78XH")
-            print("non-separated HD78XH")
-            logging.error("Required Installer Component(oldHD.zip) not found.")
-            print("Required Installer Component(oldHD.zip) not found. Download and Extract the installer again.")
-            messagebox.showerror("Kuro_B787-8 Installer - Installation Failed", "oldHD.zip not found.\n\nDownload and Extract the installer again.")
-            isInstallperformed = 0
-        else:
-            logging.info("non-separated HD78XH")
-            print("non-separated HD78XH")
-            logging.info("Patching files for older (non-separated) B78XH")
-            print("Patching files for older (non-separated) B78XH")
-            patch_f2 = zipfile.ZipFile(HDpatchpath2, "r")
-            patch_f2.extractall(Community)
-            patch_f2.close()
-            logging.info("Patched files for older (non-separated) B78XH")
-            print("Patched files for older (non-separated) B78XH")
-            isInstallperformed = 1
-    return isInstallperformed
+            isGE[n].set(0)
+        ##
+        c = tk.Radiobutton(frame, value=0, variable = isGE[n], width=2, text='',background='white')
+        c.grid(row=n+2,column=0,padx=0,pady=0,ipadx=0,ipady=0)
+        c1 = tk.Radiobutton(frame, value=1, variable = isGE[n], width=2, text='',background='white')
+        c1.grid(row=n+2,column=1,padx=0,pady=0,ipadx=0,ipady=0)
+        a4=str(bool(list_isv2[n]))
+        b4=tk.Label(frame,width=20,text=a4,background=color)
+        b4.grid(row=n+2,column=2,padx=0,pady=0,ipadx=0,ipady=0)
+        a1=list_name[n]
+        b1=tk.Label(frame,width=50,text=a1,background=color)
+        b1.grid(row=n+2,column=3,padx=0,pady=0,ipadx=0,ipady=0)
+        a2=list_airline[n]
+        b2=tk.Label(frame,width=15,text=a2,background=color)
+        b2.grid(row=n+2,column=4,padx=0,pady=0,ipadx=0,ipady=0)
+        a3=list_creator[n]
+        b3=tk.Label(frame,width=35,text=a3,background=color)
+        b3.grid(row=n+2,column=5,padx=0,pady=0,ipadx=0,ipady=0)
 
-
-def fmcUpdate(HDPath, Community, isHDB78XHnew):
-    #copy HD78XH's FMC files -v1.1.0
-    logging.debug("fmcUpdate")
-    os.chdir(HDPath)
-    if isHDB78XHnew:
-        fmcpath7878 = os.path.join(Community, 'Kuro_B787-8\html_ui\Pages\VCockpit\Instruments\Airliners\Heavy-Division-B78XH-mod\FMC')
-    else:
-        fmcpath7878 = os.path.join(Community, 'Kuro_B787-8\html_ui\Pages\VCockpit\Instruments\Airliners\B787_10\FMC')
-    print(fmcpath7878)
-    if not os.path.exists(fmcpath7878):
-        isInstallperformed = 0
-        logging.error("Kuro_B787-8 not found.")
-        print("Kuro_B787-8 not found. Install it and try again.")
-        messagebox.showerror("Kuro_B787-8 Installer - Installation Failed", "Kuro_B787-8 not found. Install it and try again.")
-        return isInstallperformed
-    shutil.copyfile('B787_10_FMC.html', fmcpath7878 + '\B787_8_FMC.html')
-    shutil.copyfile('hdfmc.js', fmcpath7878 + '\hdfmc8.js')
-    logging.info("Copied HDfiles to Kuro_B787-8")
-    print("Copied HDfiles to Kuro_B787-8")
-    #rewrite HD78XH's FMC files(html) -v1.1.0
-    os.chdir(fmcpath7878)
-    FMC788html = 'B787_8_FMC.html'
-    with open(FMC788html, encoding="UTF-8") as html:
-        htmlcontent = html.read()
-        if isHDB78XHnew:
-            htmlafter = htmlcontent.replace('/Pages/VCockpit/Instruments/Airliners/Heavy-Division-B78XH-mod/FMC/hdfmc.js', '/Pages/VCockpit/Instruments/Airliners/Heavy-Division-B78XH-mod/FMC/hdfmc8.js')
-        else:
-            htmlafter = htmlcontent.replace('/Pages/VCockpit/Instruments/Airliners/B787_10/FMC/hdfmc.js', '/Pages/VCockpit/Instruments/Airliners/B787_10/FMC/hdfmc8.js')
-    with open(FMC788html, mode="w", encoding="UTF-8") as html2:
-        html2.write(htmlafter)
-    #rewrite HD78XH's FMC files(js)
-    os.chdir(fmcpath7878)
-    FMC788js = 'hdfmc8.js'
-    with open(FMC788js, encoding="UTF-8") as js:
-        jscontent = js.read()
-        for O, N in zip(oldjs, newjs):
-            jscontent= jscontent.replace(O, N)
-    with open(FMC788js, mode="w", encoding="UTF-8") as js2:
-        js2.write(jscontent)
-    isInstallperformed = 1
-    return isInstallperformed
-
-#def - extract and copy older xml - v1.0.6
-def PatchXML():
-    logging.info("Patching xml files for older B78XH engine")
-    print("Patching xml files for older B78XH engine")
-    patch_f = zipfile.ZipFile(patchpath, "r")
-    patch_f.extractall(Community)
-    patch_f.close()
-    logging.info("Patched xml files for older B78XH engine")
-    print("Patched xml files for older B78XH engine")
-
-#check if not HD78XH is compatible with the new engine anim - v1.0.6
-def engAnim(Community, HDname, patchpath):
-    logging.debug("engAnim")
-    EngPath = os.path.join(Community, os.path.join(HDname, 'ModelBehaviorDefs\Heavy\Engines'))
-    if not os.path.exists(EngPath):
-        if not os.path.exists(patchpath):
-            logging.error("Required Installer Component(xml.zip) not found. Download and Extract the installer again.")
-            print("Required Installer Component(xml.zip) not found.")
-            messagebox.showerror("Kuro_B787-8 Installer - Installation Failed", "xml.zip not found.\n\nDownload and Extract the installer again.")
-            isInstallperformed = 0
-        else:
-            logging.info("Use old engines animation")
-            print("Use old engines animation")
-            PatchXML()
-            isInstallperformed = 1
-    else:
-        isInstallperformed = 1
-    return isInstallperformed
+        n=n+1
+    convroot.mainloop()
+    return isGEv.get()
 
 
 #livery converter v1.1.2
-def convert(Community, cfgpath):
+def convert(Community, root):
+    print("Loading Livery Converter")
+    print("\n\n>>Although the process may appear inactive at times, it is still running. Please wait until the window appears.<<\n\n")
+    logging.info('Loading Livery Converter')
     os.chdir(Community)
+    files_code = {}
+    #v2.0.0
+    list_name = []
+    list_airline = []
+    list_creator = []
+    list_dirname = []
+    list_isv2 = []
     for filename1 in glob.glob('**/aircraft.cfg', recursive=True):
-        f1 = open(filename1, mode="r")
-        s1 = f1.read()
-        f1.close()
+        with open(filename1, 'rb') as f:
+            b = f.read()
+            files_code[filename1] = detect(b)['encoding']
+    for filename1 in glob.glob('**/aircraft.cfg', recursive=True):
+        with open(filename1, encoding=files_code[filename1]) as f1:
+            s1 = f1.read()
         if 'Kuro_B787_8' in s1:
             dirname1 = os.path.dirname(filename1)
-            print("Scanned : " + dirname1)
+            print("Scanned : " + dirname1 + ", Encoding=" + files_code[filename1])
+            #v2.0.0
+            black_dirname=["Kuro_B787-8\SimObjects\Airplanes\Kuro_B787_8-AAL","Kuro_B787-8\SimObjects\Airplanes\Kuro_B787_8-ACA","Kuro_B787-8\SimObjects\Airplanes\Kuro_B787_8-ANA","Kuro_B787-8\SimObjects\Airplanes\Kuro_B787_8-ANAs","Kuro_B787-8\SimObjects\Airplanes\Kuro_B787_8-AVA","Kuro_B787-8\SimObjects\Airplanes\Kuro_B787_8-BAW","Kuro_B787-8\SimObjects\Airplanes\Kuro_B787_8-BOE","Kuro_B787-8\SimObjects\Airplanes\Kuro_B787_8-ETH","Kuro_B787-8\SimObjects\Airplanes\Kuro_B787_8-JAL","Kuro_B787-8\SimObjects\Airplanes\Kuro_B787_8-QTR","Kuro_B787-8\SimObjects\Airplanes\Kuro_B787_8-TUI","Kuro_B787-8\SimObjects\Airplanes\Kuro_B787_8-UAL"]
+            if not dirname1 in black_dirname:
+                air_ini = configparser.ConfigParser()
+                air_ini.read(os.path.join(dirname1, 'aircraft.cfg'), encoding="utf-8")
+                #v2.0.0 or not
+                txt=air_ini["FLTSIM.0"]["sound"]
+                txt=txt.split(';')[0]
+                txt=txt.replace('"','')
+                txt=txt.replace(' ','')
+
+                txt1=air_ini["FLTSIM.0"]["title"]
+                txt1=txt1.split(';')[0]
+                txt1=txt1.replace('"','')
+                '''txt1=txt1.replace(' ','')'''
+                list_name.append(txt1)
+
+                txt2=air_ini["FLTSIM.0"]["icao_airline"]
+                txt2=txt2.split(';')[0]
+                txt2=txt2.replace('"','')
+                txt2=txt2.replace(' ','')
+                list_airline.append(txt2)
+                
+                txt3=air_ini["FLTSIM.0"]["ui_createdby"]
+                if txt3.split(';')[0].replace(' ','') == "\"Kuro_x\"" or txt3.split(';')[0].replace(' ','') == "\"Kuro_x,AsoboStudio\"":
+                    list_creator.append("----")
+                else:
+                    list_creator.append(txt3.split(';')[0])
+                list_dirname.append(dirname1)
+                if txt == "":
+                    list_isv2.append(0)
+                else:
+                    list_isv2.append(1)
+    #check if no list to show
+    if list_dirname:
+        isGEv = convroot(list_name, list_airline, list_creator, root, list_isv2).split(',')
+        m=0
+        for dirname1 in list_dirname:
+            #if GE/RR Canceled
+            if isGEv[0] == "":
+                isConverted = False
+                return isConverted
+            if isGEv[m] == "0":
+                #aircraft.cfg - GE
+                air_ini = configparser.ConfigParser()
+                air_ini.read(os.path.join(dirname1, 'aircraft.cfg'), encoding="utf-8")
+                air_ini["FLTSIM.0"]["panel"] = "\"\..\..\Kuro_B787_8\panel.GE.W\""
+                air_ini["FLTSIM.0"]["sound"] = "\"\..\..\Kuro_B787_8\soundGE\""
+                f = open(os.path.join(dirname1, 'aircraft.cfg'), "w")
+                air_ini.write(f)
+                f.close()
+                
+                #texture.cfg - GE
+                texCFG = glob.glob(os.path.join(dirname1, 'texture.*/texture.cfg'))
+                if texCFG:
+                    newtex = "[fltsim]\n\nfallback.1=..\..\..\..\\texture\nfallback.2=..\..\..\..\\texture\Interiors\nfallback.3=..\..\..\..\\texture\DetailMap\nfallback.4=..\..\..\..\\texture\Glass\nfallback.5=..\..\..\..\\texture\Livery\nfallback.6=..\..\Kuro_B787_8\\texture.GE\nfallback.7=..\..\Kuro_B787_8\\texture\nfallback.8=..\..\Asobo_B787_10\\texture\nfallback.9=..\..\..\..\\texture\Planes_Generic\nfallback.10=..\..\..\..\\texture\Extinguisher"
+                    f1 = open(texCFG[0], "w")
+                    f1.write(newtex)
+                    f1.close()
+
+            else:
+                #aircraft.cfg - RR
+                air_ini = configparser.ConfigParser()
+                air_ini.read(os.path.join(dirname1, 'aircraft.cfg'), encoding="utf-8")
+                air_ini["FLTSIM.0"]["panel"] = "\"\..\..\Kuro_B787_8\panel.RR.W\""
+                air_ini["FLTSIM.0"]["sound"] = "\"\..\..\Kuro_B787_8\soundRR\""
+                f = open(os.path.join(dirname1, 'aircraft.cfg'), "w")
+                air_ini.write(f)
+                f.close()
+
+                #texture.cfg - RR
+                texCFG = glob.glob(os.path.join(dirname1, 'texture.*/texture.cfg'))
+                if texCFG:
+                    newtex = "[fltsim]\n\nfallback.1=..\..\..\..\\texture\nfallback.2=..\..\..\..\\texture\Interiors\nfallback.3=..\..\..\..\\texture\DetailMap\nfallback.4=..\..\..\..\\texture\Glass\nfallback.5=..\..\..\..\\texture\Livery\nfallback.6=..\..\Kuro_B787_8\\texture.RR\nfallback.7=..\..\Kuro_B787_8\\texture\nfallback.8=..\..\Asobo_B787_10\\texture\nfallback.9=..\..\..\..\\texture\Planes_Generic\nfallback.10=..\..\..\..\\texture\Extinguisher"
+                    f1 = open(texCFG[0], "w")
+                    f1.write(newtex)
+                    f1.close()
+            
+            #del Panel
+            paneldir = glob.glob(os.path.join(dirname1, 'panel.*'))
+            if paneldir:
+                if os.path.isdir(paneldir[0]):
+                    shutil.rmtree(paneldir[0], onerror=remove_readonly)
+
             #model.cfg
-            for model1 in glob.glob(os.path.join(dirname1, 'model.*/model.cfg')):
-                shutil.copyfile(cfgpath + r'\model.cfg', model1)
-            #texture.cfg
-            for tex1 in glob.glob(os.path.join(dirname1, 'texture.*/texture.cfg')):
-                shutil.copyfile(cfgpath + r'\texture.cfg', tex1)
-            #panel.cfg
-            for panel1 in glob.glob(os.path.join(dirname1, 'panel.*/panel.cfg')):
-                shutil.copyfile(cfgpath + r'\panel.cfg', panel1)
+            mdlCFG = glob.glob(os.path.join(dirname1, 'model.*/model.cfg'))
+            if mdlCFG:
+                newmod = '; Reference LOD implementation, please keep these comments (for now).\n\n[model.options]\n; if true, when showing the exterior, also show the interior model (default false)\nwithExterior_showInterior=true\n; if true, when showing the interior with the exterior, exclude interior.lod.0 (default false); only has an effect when withExterior_showInterior is true\nwithExterior_showInterior_hideFirstLod=true\n; when showing the interior, force showing lod0 (default true)\nwithInterior_forceFirstLod=true\n; when showing the interior, also show the exterior model (default false)\nwithInterior_showExterior=true\n\n[models]\nexterior=B787.xml\ninterior=..\..\Asobo_B787_10\model\B787_10_interior.xml\n\n'
+                f2 = open(mdlCFG[0], "w")
+                f2.write(newmod)
+                f2.close()
+            
+            #model.xml
+            mdlXML = glob.glob(os.path.join(dirname1, 'model.*/*.xml'))
+            if mdlXML:
+                tree = ET.parse(mdlXML[0]) 
+                root = tree.getroot()
+                #delete Heavy
+                for name in root.iter('Behaviors'):
+                    for child in name:
+                        for inc in child.iter('Include'):
+                            if inc.attrib.get('ModelBehaviorFile') == "Heavy\\Engines\\Index.xml":
+                                name.remove(child)
+                            if inc.attrib.get('ModelBehaviorFile') == "Heavy\\Aircrafts\\Boeing\\787\\10\XH\\Index.xml":
+                                name.remove(child)
+                #delete Lights (Heavy)
+                    for child in name:
+                        for inc in child.iter('Component'):
+                            #del GEARS
+                            if inc.attrib.get('ID') == "GEARS":
+                                name.remove(child)
+                    for child in name:
+                        for inc in child.iter('Component'):
+                            if inc.attrib.get('ID') == "Lightning":
+                                name.remove(child)
+                            #del ENGINE
+                            if inc.attrib.get('ID') == "ENGINE":
+                                name.remove(child)
+                new_tree = ET.ElementTree(root)
+                new_tree.write(mdlXML[0], encoding='utf-8', xml_declaration=True)
+
+                #add ENGINE/GEARS
+                with open(mdlXML[0], mode="r", encoding="UTF-8") as xml1:
+                    Conxml1 = xml1.read()
+                    edit_old = "	</Behaviors>	\n</ModelInfo>"
+                    #edit_new = "		<Component ID=\"GEARS\">\n			<UseTemplate Name=\"ASOBO_GT_Anim\">\n                <ANIM_NAME>c_gear</ANIM_NAME>\n                <ANIM_CODE>(A:GEAR ANIMATION POSITION:0, number) 0.5 &lt; if{ (A:GEAR ANIMATION POSITION:0, number) 100 * } els{ (A:GEAR ANIMATION POSITION:0, number) 2 * 1 - sqrt 50 * 50 + }</ANIM_CODE>\n                <ANIM_LENGTH>100</ANIM_LENGTH>\n            </UseTemplate>\n		<!--\n			<UseTemplate Name=\"ASOBO_GEAR_Center_Template\">\n				<ANIM_NAME>c_gear</ANIM_NAME>\n			</UseTemplate>\n		-->\n		<!--\n			<UseTemplate Name=\"ASOBO_GEAR_Left_Template\">\n				<ANIM_NAME>l_gear</ANIM_NAME>\n			</UseTemplate>\n		-->\n			<UseTemplate Name=\"ASOBO_GT_Anim\">\n                <ANIM_NAME>l_gear</ANIM_NAME>\n                <ANIM_CODE>(A:GEAR ANIMATION POSITION:1, number) 0.5 &lt; if{ (A:GEAR ANIMATION POSITION:1, number) 100 * } els{ (A:GEAR ANIMATION POSITION:1, number) 2 * 1 - sqrt 50 * 50 + }</ANIM_CODE>\n                <ANIM_LENGTH>100</ANIM_LENGTH>\n            </UseTemplate>\n			<UseTemplate Name=\"ASOBO_GT_Anim\">\n				<ANIM_NAME>Door01_left_LIVERYDECALS</ANIM_NAME>\n                <ANIM_CODE>(A:GEAR ANIMATION POSITION:1, number) 0.5 &lt; if{ (A:GEAR ANIMATION POSITION:1, number) 100 * } els{ (A:GEAR ANIMATION POSITION:1, number) 2 * 1 - sqrt 50 * 50 + }</ANIM_CODE>\n                <ANIM_LENGTH>100</ANIM_LENGTH>\n			</UseTemplate>\n			<!--\n			<UseTemplate Name=\"ASOBO_GEAR_Left_Template\">\n				<ANIM_NAME>Door01_left_LIVERYDECALS</ANIM_NAME>\n			</UseTemplate>\n			-->\n			<!--\n			<UseTemplate Name=\"ASOBO_GEAR_Right_Template\">\n				<ANIM_NAME>r_gear</ANIM_NAME>\n			-->\n			<UseTemplate Name=\"ASOBO_GT_Anim\">\n                <ANIM_NAME>r_gear</ANIM_NAME>\n                <ANIM_CODE>(A:GEAR ANIMATION POSITION:2, number) 0.5 &lt; if{ (A:GEAR ANIMATION POSITION:2, number) 100 * } els{ (A:GEAR ANIMATION POSITION:2, number) 2 * 1 - sqrt 50 * 50 + }</ANIM_CODE>\n                <ANIM_LENGTH>100</ANIM_LENGTH>\n				<!-- ANIM EVENTS -->\n				<ANIM_EVENT_EFFECT_NAME>CAM_LANDINGGEARS</ANIM_EVENT_EFFECT_NAME>\n				<NORMALIZED_TIME>0.5</NORMALIZED_TIME>\n				<DIRECTION>Both</DIRECTION>\n			</UseTemplate>\n			<UseTemplate Name=\"ASOBO_GT_Anim\">\n				<ANIM_NAME>Door01_right_LIVERYDECALS</ANIM_NAME>\n                <ANIM_CODE>(A:GEAR ANIMATION POSITION:2, number) 0.5 &lt; if{ (A:GEAR ANIMATION POSITION:2, number) 100 * } els{ (A:GEAR ANIMATION POSITION:2, number) 2 * 1 - sqrt 50 * 50 + }</ANIM_CODE>\n                <ANIM_LENGTH>100</ANIM_LENGTH>\n            </UseTemplate>\n			<!--\n			<UseTemplate Name=\"ASOBO_GEAR_Right_Template\">\n				<ANIM_NAME>Door01_right_LIVERYDECALS</ANIM_NAME>\n			</UseTemplate>\n			-->\n			<UseTemplate Name=\"ASOBO_GEAR_Center_Tire_Template\">\n				<ANIM_NAME>c_tire_key</ANIM_NAME>\n				<NODE_ID_STILL>Wheel_Nose_center</NODE_ID_STILL>\n				<NODE_ID_BLURRED>Wheel_Nose_blurred</NODE_ID_BLURRED>\n			</UseTemplate>\n			<UseTemplate Name=\"ASOBO_GEAR_Left_Tire_Template\">\n				<ANIM_NAME>l_tire_key</ANIM_NAME>\n				<NODE_ID_STILL>LWHEEL_01_STILL</NODE_ID_STILL>\n				<NODE_ID_BLURRED>LWHEEL_01_BLURRED</NODE_ID_BLURRED>\n				<NODE_ID_STILL_2>LWHEEL_02_STILL</NODE_ID_STILL_2>\n				<NODE_ID_BLURRED_2>LWHEEL_02_BLURRED</NODE_ID_BLURRED_2>\n			</UseTemplate>\n			<UseTemplate Name=\"ASOBO_GEAR_Right_Tire_Template\">\n				<ANIM_NAME>r_tire_key</ANIM_NAME>\n				<NODE_ID_STILL>RWHEEL_01_STILL</NODE_ID_STILL>\n				<NODE_ID_BLURRED>RWHEEL_01_BLURRED</NODE_ID_BLURRED>\n				<NODE_ID_STILL_2>RWHEEL_02_STILL</NODE_ID_STILL_2>\n				<NODE_ID_BLURRED_2>RWHEEL_02_BLURRED</NODE_ID_BLURRED_2>\n			</UseTemplate>\n			<UseTemplate Name=\"ASOBO_GEAR_Steering_Template\">\n    			<ANIM_SIMVAR_SCALE>1</ANIM_SIMVAR_SCALE>\n				<ANIM_NAME>c_wheel</ANIM_NAME>\n			</UseTemplate>\n		</Component>\n		<Component ID=\"ENGINE\">\n			<UseTemplate Name=\"ASOBO_ENGINE_Turbine_Template\">\n				<ID>1</ID>\n				<MIN_RPM_FOR_SLOW>19000</MIN_RPM_FOR_SLOW>\n				<MIN_RPM_FOR_BLUR>19000</MIN_RPM_FOR_BLUR>\n				<STILL_NODE_ID>1_STILL_LEFT</STILL_NODE_ID>\n				<SLOW_NODE_ID>1_SLOW_LEFT</SLOW_NODE_ID>\n				<BLURRED_NODE_ID>1_BLURRED_LEFT</BLURRED_NODE_ID>\n				<ANIM_NODE_ID>B787:Reactor_Prop_Still_left</ANIM_NODE_ID>\n				<ANIM_NAME>N1_1_anim</ANIM_NAME>\n			</UseTemplate>\n			<UseTemplate Name=\"ASOBO_ENGINE_Turbine_Template\">\n				<ID>2</ID>\n				<MIN_RPM_FOR_SLOW>19000</MIN_RPM_FOR_SLOW>\n				<MIN_RPM_FOR_BLUR>19000</MIN_RPM_FOR_BLUR>\n				<STILL_NODE_ID>2_STILL_RIGHT</STILL_NODE_ID>\n				<SLOW_NODE_ID>2_SLOW_RIGHT</SLOW_NODE_ID>\n				<BLURRED_NODE_ID>2_BLURRED_RIGHT</BLURRED_NODE_ID>\n				<ANIM_NODE_ID>B787:Reactor_Prop_Still_right</ANIM_NODE_ID>\n				<ANIM_NAME>N1_2_anim</ANIM_NAME>\n			</UseTemplate>\n			<UseTemplate Name=\"ASOBO_GT_Anim\">\n				<ANIM_NAME>thrust_rev_1</ANIM_NAME>\n				<ANIM_CODE>(A:GENERAL ENG THROTTLE LEVER POSITION:1, Percent) 0 &lt; 100 *</ANIM_CODE>\n				<ANIM_LAG>75</ANIM_LAG>\n			</UseTemplate>\n			<UseTemplate Name=\"ASOBO_GT_Anim\">\n				<ANIM_NAME>thrust_rev_2</ANIM_NAME>\n				<ANIM_CODE>(A:GENERAL ENG THROTTLE LEVER POSITION:2, Percent) 0 &lt; 100 *</ANIM_CODE>\n				<ANIM_LAG>75</ANIM_LAG>\n			</UseTemplate>\n		</Component>\n	</Behaviors>	\n</ModelInfo>"
+                    edit_new = "		<Component ID=\"GEARS\">\n			<UseTemplate Name=\"ASOBO_GT_Anim\">\n                <ANIM_NAME>c_gear</ANIM_NAME>\n                <ANIM_CODE>(A:GEAR ANIMATION POSITION:0, number) 0.5 &lt; if{ (A:GEAR ANIMATION POSITION:0, number) 100 * } els{ (A:GEAR ANIMATION POSITION:0, number) 2 * 1 - sqrt 50 * 50 + }</ANIM_CODE>\n                <ANIM_LENGTH>100</ANIM_LENGTH>\n            </UseTemplate>\n		<!--\n			<UseTemplate Name=\"ASOBO_GEAR_Center_Template\">\n				<ANIM_NAME>c_gear</ANIM_NAME>\n			</UseTemplate>\n		-->\n		<!--\n			<UseTemplate Name=\"ASOBO_GEAR_Left_Template\">\n				<ANIM_NAME>l_gear</ANIM_NAME>\n			</UseTemplate>\n		-->\n			<UseTemplate Name=\"ASOBO_GT_Anim\">\n                <ANIM_NAME>l_gear</ANIM_NAME>\n                <ANIM_CODE>(A:GEAR ANIMATION POSITION:1, number) 0.5 &lt; if{ (A:GEAR ANIMATION POSITION:1, number) 100 * } els{ (A:GEAR ANIMATION POSITION:1, number) 2 * 1 - sqrt 50 * 50 + }</ANIM_CODE>\n                <ANIM_LENGTH>100</ANIM_LENGTH>\n            </UseTemplate>\n			<UseTemplate Name=\"ASOBO_GT_Anim\">\n				<ANIM_NAME>Door01_left_LIVERYDECALS</ANIM_NAME>\n                <ANIM_CODE>(A:GEAR ANIMATION POSITION:1, number) 0.5 &lt; if{ (A:GEAR ANIMATION POSITION:1, number) 100 * } els{ (A:GEAR ANIMATION POSITION:1, number) 2 * 1 - sqrt 50 * 50 + }</ANIM_CODE>\n                <ANIM_LENGTH>100</ANIM_LENGTH>\n			</UseTemplate>\n			<!--\n			<UseTemplate Name=\"ASOBO_GEAR_Left_Template\">\n				<ANIM_NAME>Door01_left_LIVERYDECALS</ANIM_NAME>\n			</UseTemplate>\n			-->\n			<!--\n			<UseTemplate Name=\"ASOBO_GEAR_Right_Template\">\n				<ANIM_NAME>r_gear</ANIM_NAME>\n			-->\n			<UseTemplate Name=\"ASOBO_GT_Anim\">\n                <ANIM_NAME>r_gear</ANIM_NAME>\n                <ANIM_CODE>(A:GEAR ANIMATION POSITION:2, number) 0.5 &lt; if{ (A:GEAR ANIMATION POSITION:2, number) 100 * } els{ (A:GEAR ANIMATION POSITION:2, number) 2 * 1 - sqrt 50 * 50 + }</ANIM_CODE>\n                <ANIM_LENGTH>100</ANIM_LENGTH>\n				<!-- ANIM EVENTS -->\n				<ANIM_EVENT_EFFECT_NAME>CAM_LANDINGGEARS</ANIM_EVENT_EFFECT_NAME>\n				<NORMALIZED_TIME>0.5</NORMALIZED_TIME>\n				<DIRECTION>Both</DIRECTION>\n			</UseTemplate>\n			<UseTemplate Name=\"ASOBO_GT_Anim\">\n				<ANIM_NAME>Door01_right_LIVERYDECALS</ANIM_NAME>\n                <ANIM_CODE>(A:GEAR ANIMATION POSITION:2, number) 0.5 &lt; if{ (A:GEAR ANIMATION POSITION:2, number) 100 * } els{ (A:GEAR ANIMATION POSITION:2, number) 2 * 1 - sqrt 50 * 50 + }</ANIM_CODE>\n                <ANIM_LENGTH>100</ANIM_LENGTH>\n            </UseTemplate>\n			<!--\n			<UseTemplate Name=\"ASOBO_GEAR_Right_Template\">\n				<ANIM_NAME>Door01_right_LIVERYDECALS</ANIM_NAME>\n			</UseTemplate>\n			-->\n			<UseTemplate Name=\"ASOBO_GEAR_Center_Tire_Template\">\n				<ANIM_NAME>c_tire_key</ANIM_NAME>\n				<NODE_ID_STILL>Wheel_Nose_center</NODE_ID_STILL>\n				<NODE_ID_BLURRED>Wheel_Nose_blurred</NODE_ID_BLURRED>\n			</UseTemplate>\n			<UseTemplate Name=\"ASOBO_GEAR_Left_Tire_Template\">\n				<ANIM_NAME>l_tire_key</ANIM_NAME>\n				<NODE_ID_STILL>LWHEEL_01_STILL</NODE_ID_STILL>\n				<NODE_ID_BLURRED>LWHEEL_01_BLURRED</NODE_ID_BLURRED>\n				<NODE_ID_STILL_2>LWHEEL_02_STILL</NODE_ID_STILL_2>\n				<NODE_ID_BLURRED_2>LWHEEL_02_BLURRED</NODE_ID_BLURRED_2>\n			</UseTemplate>\n			<UseTemplate Name=\"ASOBO_GEAR_Right_Tire_Template\">\n				<ANIM_NAME>r_tire_key</ANIM_NAME>\n				<NODE_ID_STILL>RWHEEL_01_STILL</NODE_ID_STILL>\n				<NODE_ID_BLURRED>RWHEEL_01_BLURRED</NODE_ID_BLURRED>\n				<NODE_ID_STILL_2>RWHEEL_02_STILL</NODE_ID_STILL_2>\n				<NODE_ID_BLURRED_2>RWHEEL_02_BLURRED</NODE_ID_BLURRED_2>\n			</UseTemplate>\n			<UseTemplate Name=\"ASOBO_GEAR_Steering_Template\">\n    			<ANIM_SIMVAR_SCALE>1</ANIM_SIMVAR_SCALE>\n				<ANIM_NAME>c_wheel</ANIM_NAME>\n			</UseTemplate>\n		</Component>\n		<Component ID=\"ENGINE\">\n			<Component ID=\"ENGINE_Turbine_1\" Node=\"N1_1_anim\">\n				<DefaultTemplateParameters>\n					<ID>1</ID>\n					<ANIM_NODE_ID>N1_1_anim</ANIM_NODE_ID>\n					<ANIM_NAME>N1_1_anim</ANIM_NAME>\n					<STILL_NODE_ID>PROP_1_STILL_LEFT</STILL_NODE_ID>\n					<SLOW_NODE_ID>PROP_1_SLOW_LEFT</SLOW_NODE_ID>\n					<BLURRED_NODE_ID>PROP_1_BLURRED_LEFT</BLURRED_NODE_ID>\n					<MIN_N1_PCT_FOR_SLOW>80</MIN_N1_PCT_FOR_SLOW>\n					<MIN_N1_PCT_FOR_BLUR>120</MIN_N1_PCT_FOR_BLUR>\n					<FROSTED>False</FROSTED>\n					<STILL_NODE_ID_COUNT>2</STILL_NODE_ID_COUNT>\n					<SLOW_NODE_ID_COUNT>1</SLOW_NODE_ID_COUNT>\n					<BLURRED_NODE_ID_COUNT>2</BLURRED_NODE_ID_COUNT>\n				</DefaultTemplateParameters>\n				<UseTemplate Name=\"ASOBO_GT_Anim\">\n					<!-- 2726 is the max rated N1 of the GEnx-1B64 -->\n					<ANIM_CODE>0.01 3 2726 (A:TURB ENG N1:1, Percent) (A:ANIMATION DELTA TIME, seconds) * * * *</ANIM_CODE>\n					<ANIM_LENGTH>360</ANIM_LENGTH>\n					<ANIM_WRAP>1</ANIM_WRAP>\n					<ANIM_DELTA>1</ANIM_DELTA>\n				</UseTemplate>\n			</Component>\n			<Component ID=\"ENGINE_Turbine_1_Visibility\">\n				<DefaultTemplateParameters>\n					<ID>1</ID>\n					<ANIM_NODE_ID>N1_1_anim</ANIM_NODE_ID>\n					<ANIM_NAME>N1_1_anim</ANIM_NAME>\n					<STILL_NODE_ID>PROP_1_STILL_LEFT</STILL_NODE_ID>\n					<SLOW_NODE_ID>PROP_1_SLOW_LEFT</SLOW_NODE_ID>\n					<BLURRED_NODE_ID>PROP_1_BLURRED_LEFT</BLURRED_NODE_ID>   \n					<MIN_N1_PCT_FOR_SLOW>80</MIN_N1_PCT_FOR_SLOW>\n					<MIN_N1_PCT_FOR_BLUR>120</MIN_N1_PCT_FOR_BLUR>\n					<FROSTED>False</FROSTED>\n					<STILL_NODE_ID_COUNT>2</STILL_NODE_ID_COUNT>\n					<SLOW_NODE_ID_COUNT>1</SLOW_NODE_ID_COUNT>\n					<BLURRED_NODE_ID_COUNT>2</BLURRED_NODE_ID_COUNT>\n				</DefaultTemplateParameters>\n				<OverrideTemplateParameters>\n					<PROCESS_PARAM1>True</PROCESS_PARAM1>\n					<PARAM1>NODE_ID</PARAM1>\n					<PARAM1_SUFFIX>_NODE_ID</PARAM1_SUFFIX>\n				</OverrideTemplateParameters>\n				<UseTemplate Name=\"ASOBO_GT_Helper_Recursive_ID\">\n					<MAX_ID>2</MAX_ID>\n					<STATE>Still</STATE>\n					<PARAM1_PREFIX>STILL_</PARAM1_PREFIX>\n				</UseTemplate>\n				<UseTemplate Name=\"ASOBO_GT_Helper_Recursive_ID\">\n					<MAX_ID>1</MAX_ID>\n					<STATE>Slow</STATE>\n					<PARAM1_PREFIX>SLOW_</PARAM1_PREFIX>\n				</UseTemplate>\n				<UseTemplate Name=\"ASOBO_GT_Helper_Recursive_ID\">\n					<MAX_ID>2</MAX_ID>\n					<STATE>Blurred</STATE>\n					<PARAM1_PREFIX>BLURRED_</PARAM1_PREFIX>\n				</UseTemplate>\n				<Condition NotEmpty=\"NODE_ID\" STATE=\"Still\">\n					<True>\n						<UseTemplate Name=\"ASOBO_GT_Visibility\">\n							<VISIBILITY_CODE>(A:TURB ENG N1:1, Percent) 80 &lt;</VISIBILITY_CODE>\n						</UseTemplate>\n					</True>\n				</Condition>\n				<Condition NotEmpty=\"NODE_ID\" STATE=\"Slow\">\n					<True>\n						<UseTemplate Name=\"ASOBO_GT_Visibility\">\n							<VISIBILITY_CODE>\n								(A:TURB ENG N1:1, Percent) 80 &gt;\n								(A:TURB ENG N1:1, Percent) 120 &lt; and\n							</VISIBILITY_CODE>\n						</UseTemplate>\n					</True>\n				</Condition>\n				<Condition NotEmpty=\"NODE_ID\" STATE=\"Blurred\">\n					<True>\n						<UseTemplate Name=\"ASOBO_GT_Visibility\">\n							<VISIBILITY_CODE>(A:TURB ENG N1:1, Percent) 120 &gt;</VISIBILITY_CODE>\n						</UseTemplate>\n					</True>\n				</Condition>\n			</Component>\n			<Component ID=\"ENGINE_Turbine_2\" Node=\"N1_2_anim\">\n				<DefaultTemplateParameters>\n					<ID>2</ID>\n					<ANIM_NODE_ID>N1_2_anim</ANIM_NODE_ID>\n					<ANIM_NAME>N1_2_anim</ANIM_NAME>\n					<STILL_NODE_ID>PROP_2_STILL_LEFT</STILL_NODE_ID>\n					<SLOW_NODE_ID>PROP_2_SLOW_LEFT</SLOW_NODE_ID>\n					<BLURRED_NODE_ID>PROP_2_BLURRED_LEFT</BLURRED_NODE_ID>\n					<MIN_N1_PCT_FOR_SLOW>80</MIN_N1_PCT_FOR_SLOW>\n					<MIN_N1_PCT_FOR_BLUR>120</MIN_N1_PCT_FOR_BLUR>\n					<FROSTED>False</FROSTED>\n					<STILL_NODE_ID_COUNT>2</STILL_NODE_ID_COUNT>\n					<SLOW_NODE_ID_COUNT>1</SLOW_NODE_ID_COUNT>\n					<BLURRED_NODE_ID_COUNT>2</BLURRED_NODE_ID_COUNT>\n				</DefaultTemplateParameters>\n				<UseTemplate Name=\"ASOBO_GT_Anim\">\n					<!-- 2726 is the max rated N1 of the GEnx-1B64 -->\n					<ANIM_CODE>0.01 3 2726 (A:TURB ENG N1:2, Percent) (A:ANIMATION DELTA TIME, seconds) * * * *</ANIM_CODE>\n					<ANIM_LENGTH>360</ANIM_LENGTH>\n					<ANIM_WRAP>1</ANIM_WRAP>\n					<ANIM_DELTA>1</ANIM_DELTA>\n				</UseTemplate>\n			</Component>\n			<Component ID=\"ENGINE_Turbine_2_Visibility\">\n				<DefaultTemplateParameters>\n					<ID>2</ID>\n					<ANIM_NODE_ID>N1_2_anim</ANIM_NODE_ID>\n					<ANIM_NAME>N1_2_anim</ANIM_NAME>\n					<STILL_NODE_ID>PROP_2_STILL_LEFT</STILL_NODE_ID>\n					<SLOW_NODE_ID>PROP_2_SLOW_LEFT</SLOW_NODE_ID>\n					<BLURRED_NODE_ID>PROP_2_BLURRED_LEFT</BLURRED_NODE_ID>   \n					<MIN_N1_PCT_FOR_SLOW>80</MIN_N1_PCT_FOR_SLOW>\n					<MIN_N1_PCT_FOR_BLUR>120</MIN_N1_PCT_FOR_BLUR>\n					<FROSTED>False</FROSTED>\n					<STILL_NODE_ID_COUNT>2</STILL_NODE_ID_COUNT>\n					<SLOW_NODE_ID_COUNT>1</SLOW_NODE_ID_COUNT>\n					<BLURRED_NODE_ID_COUNT>2</BLURRED_NODE_ID_COUNT>\n				</DefaultTemplateParameters>\n				<OverrideTemplateParameters>\n					<PROCESS_PARAM1>True</PROCESS_PARAM1>\n					<PARAM1>NODE_ID</PARAM1>\n					<PARAM1_SUFFIX>_NODE_ID</PARAM1_SUFFIX>\n				</OverrideTemplateParameters>\n				<UseTemplate Name=\"ASOBO_GT_Helper_Recursive_ID\">\n					<MAX_ID>2</MAX_ID>\n					<STATE>Still</STATE>\n					<PARAM1_PREFIX>STILL_</PARAM1_PREFIX>\n				</UseTemplate>\n				<UseTemplate Name=\"ASOBO_GT_Helper_Recursive_ID\">\n					<MAX_ID>1</MAX_ID>\n					<STATE>Slow</STATE>\n					<PARAM1_PREFIX>SLOW_</PARAM1_PREFIX>\n				</UseTemplate>\n				<UseTemplate Name=\"ASOBO_GT_Helper_Recursive_ID\">\n					<MAX_ID>2</MAX_ID>\n					<STATE>Blurred</STATE>\n					<PARAM1_PREFIX>BLURRED_</PARAM1_PREFIX>\n				</UseTemplate>\n				<Condition NotEmpty=\"NODE_ID\" STATE=\"Still\">\n					<True>\n						<UseTemplate Name=\"ASOBO_GT_Visibility\">\n							<VISIBILITY_CODE>(A:TURB ENG N1:2, Percent) 80 &lt;</VISIBILITY_CODE>\n						</UseTemplate>\n					</True>\n				</Condition>\n				<Condition NotEmpty=\"NODE_ID\" STATE=\"Slow\">\n					<True>\n						<UseTemplate Name=\"ASOBO_GT_Visibility\">\n							<VISIBILITY_CODE>\n								(A:TURB ENG N1:2, Percent) 80 &gt;\n								(A:TURB ENG N1:2, Percent) 120 &lt; and\n							</VISIBILITY_CODE>\n						</UseTemplate>\n					</True>\n				</Condition>\n				<Condition NotEmpty=\"NODE_ID\" STATE=\"Blurred\">\n					<True>\n						<UseTemplate Name=\"ASOBO_GT_Visibility\">\n							<VISIBILITY_CODE>(A:TURB ENG N1:2, Percent) 120 &gt;</VISIBILITY_CODE>\n						</UseTemplate>\n					</True>\n				</Condition>\n			</Component>\n			<!--<UseTemplate Name=\"ASOBO_ENGINE_Turbine_Template\">\n				<ID>1</ID>\n				<MIN_RPM_FOR_SLOW>19000</MIN_RPM_FOR_SLOW>\n				<MIN_RPM_FOR_BLUR>19000</MIN_RPM_FOR_BLUR>\n				<STILL_NODE_ID>1_STILL_LEFT</STILL_NODE_ID>\n				<SLOW_NODE_ID>1_SLOW_LEFT</SLOW_NODE_ID>\n				<BLURRED_NODE_ID>1_BLURRED_LEFT</BLURRED_NODE_ID>\n				<ANIM_NODE_ID>B787:Reactor_Prop_Still_left</ANIM_NODE_ID>\n				<ANIM_NAME>N1_1_anim</ANIM_NAME>\n			</UseTemplate>\n			<UseTemplate Name=\"ASOBO_ENGINE_Turbine_Template\">\n				<ID>2</ID>\n				<MIN_RPM_FOR_SLOW>19000</MIN_RPM_FOR_SLOW>\n				<MIN_RPM_FOR_BLUR>19000</MIN_RPM_FOR_BLUR>\n				<STILL_NODE_ID>2_STILL_RIGHT</STILL_NODE_ID>\n				<SLOW_NODE_ID>2_SLOW_RIGHT</SLOW_NODE_ID>\n				<BLURRED_NODE_ID>2_BLURRED_RIGHT</BLURRED_NODE_ID>\n				<ANIM_NODE_ID>B787:Reactor_Prop_Still_right</ANIM_NODE_ID>\n				<ANIM_NAME>N1_2_anim</ANIM_NAME>\n			</UseTemplate>-->\n			<UseTemplate Name=\"ASOBO_GT_Anim\">\n				<ANIM_NAME>thrust_rev_1</ANIM_NAME>\n				<ANIM_CODE>(A:GENERAL ENG THROTTLE LEVER POSITION:1, Percent) 0 &lt; 100 *</ANIM_CODE>\n				<ANIM_LAG>75</ANIM_LAG>\n			</UseTemplate>\n			<UseTemplate Name=\"ASOBO_GT_Anim\">\n				<ANIM_NAME>thrust_rev_2</ANIM_NAME>\n				<ANIM_CODE>(A:GENERAL ENG THROTTLE LEVER POSITION:2, Percent) 0 &lt; 100 *</ANIM_CODE>\n				<ANIM_LAG>75</ANIM_LAG>\n			</UseTemplate>\n		</Component>\n	</Behaviors>\n</ModelInfo>"
+                    Conxml1= Conxml1.replace(edit_old, edit_new)
+                with open(mdlXML[0], mode="w", encoding="UTF-8") as Conxml2:
+                    Conxml2.write(Conxml1)
+            m=m+1
+            isConverted = True
+            return isConverted
+    else:
+        messagebox.showinfo("Kuro_B787-8 Installer", "There are no liveries to convert\n(= You haven't installed any third party liveries)")
+        isConverted = False
+        return isConverted
+
+
 
 #livery updater v1.1.0
-def liveryconv(Community, cfgpath, isConvertOnly, isUpdate):
+def liveryconv(Community, isUpdate, root):
     logging.debug("liveryconv")
-    #Install or just convert livery
-    if not isConvertOnly and isUpdate:#update
-        LivInstMessage = "\n\nIf you select No, conversion will NOT be performed, AND the update will also be automatically canceled. ; Install Stable/Dev(~v0.1.15 or so) B78XH and run again."
-    elif not isConvertOnly and not isUpdate:#install
-        LivInstMessage = "\n\nIf you select No, conversion will NOT be performed, AND the installation will also be automatically canceled. ; Install Stable/Dev(~v0.1.15 or so) B78XH and run again."
-    else:
-        LivInstMessage = ""
-    if messagebox.askyesno("Kuro_B787-8 Installer", """The installer has detected that you are using the recently released B78XH.
-The B78XH v0.1.15-22(exp)~ is named "B78XH soft fork" and is separated from the Asobo(Default) B787-10. This will apply to Stable and Dev as well.
-
-If you are using the B78XH soft fork, the previous B787-8 and its liveries are not compatible and the fmc/cockpit will not show up or it cause CTD.
+    if messagebox.askyesno("Kuro_B787-8 Installer", """The previous B787-8 liveries are not compatible and cause CTD.
 Do you want to convert all the liveries for the B787-8 installed in your Community folder?
 (Including third party liveries created from the official Paint Kit)
->>This operation cannot be undone.<<
 
->>>If you want to revert to "non-soft fork" and use the B787-8, you will need to reinstall the B787-8. At that time, the installer will revert all the liveries automatically.<<<""" + LivInstMessage):
-        
-        if not isConvertOnly:#install
-            isLivConverted = 1
-        else:#convert only
-            convert(Community, cfgpath)
-            isLivConverted = 1
+Although the process may appear inactive at times, it is still running. Please wait until the window appears."""):
+        isConverted = convert(Community, root)
     else:
-        isLivConverted = 0
-    return isLivConverted
+        isConverted = 0
     os.chdir(pydir)
+    return isConverted
 
 
-#livery updater for older one v1.1.4
-def liveryconv0(Community, cfgpath0, isConvertOnly, isUpdate):
-    logging.debug("liveryconv0")
-    if not isConvertOnly:#install
-        isLivConverted = 1
-    else:#convert only
-        convert0(Community, cfgpath0)
-        isLivConverted = 1
-    return isLivConverted
-    os.chdir(pydir)
 
-#livery converter for older one v1.1.4
-def convert0(Community, cfgpath0):
-    os.chdir(Community)
-    for filename1 in glob.glob('**/aircraft.cfg', recursive=True):
-        f1 = open(filename1, mode="r")
-        s1 = f1.read()
-        f1.close()
-        if 'Kuro_B787_8' in s1:
-            dirname1 = os.path.dirname(filename1)
-            print("Scanned : " + dirname1)
-            #model.cfg
-            for model1 in glob.glob(os.path.join(dirname1, 'model.*/model.cfg')):
-                shutil.copyfile(cfgpath0 + r'\model.cfg', model1)
-            #texture.cfg
-            for tex1 in glob.glob(os.path.join(dirname1, 'texture.*/texture.cfg')):
-                shutil.copyfile(cfgpath0 + r'\texture.cfg', tex1)
-            #panel.cfg
-            for panel1 in glob.glob(os.path.join(dirname1, 'panel.*/panel.cfg')):
-                shutil.copyfile(cfgpath0 + r'\panel.cfg', panel1)
 
 def endI():
-    print('Update FMC/Animation files each time after updating B78XH. If not, the instruments/animations will not work properly.')
-    messagebox.showwarning("Kuro_B787-8 Installer", "Update FMC/Animation files each time after updating B78XH.\nIf not, the instruments/animations will not work properly.")
     logging.info('Installation/Update has been completed')
     print('Installation/Update has been completed')
     messagebox.showinfo("Kuro_B787-8 Installer", "Installation/Update has been completed.")
     os.chdir(pydir)
-def endF():
-    logging.info('FMC/Animation files have been updated.')
-    print('FMC/Animation files have been updated.')
-    messagebox.showinfo("Kuro_B787-8 Installer", "FMC/Animation files have been updated.")
-    os.chdir(pydir)
+
 def endL():
-    logging.info('Livery configs have been updated.')
-    print('Livery configs have been updated.')
-    messagebox.showinfo("Kuro_B787-8 Installer", "Livery configs have been updated.")
+    logging.info('Liveries have been updated.')
+    print('Liveries have been updated.')
+    messagebox.showinfo("Kuro_B787-8 Installer", "Liveries have been updated.")
     os.chdir(pydir)
+
 def endC():
     logging.info('Installation/Update has been automatically canceled.')
     print('Installation/Update has been automatically canceled.')
     messagebox.showinfo("Kuro_B787-8 Installer", "Installation has been automatically canceled.")
     os.chdir(pydir)
 
-
+#firstinstall step5,6
+if isFirstInstallT:
+    install(com, UseGESp, UseRRSp, root)
+    livery(com, root)
 root.mainloop()
