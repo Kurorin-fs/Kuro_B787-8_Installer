@@ -1,5 +1,5 @@
 # FAQ
-##### Last Updated On : July 3, 2023
+##### Last Updated On : July 4, 2023
 ###### For v2.0.0~
 
 
@@ -31,7 +31,7 @@
 
 </details>
 
-<details><summary><strong>The Installer show errors during converting liveries</strong></summary>
+<details><summary><strong>The Installer shows errors during converting liveries</strong></summary>
 
 - Some liveries are incompatible at all, so you'll have to remove them.
   
