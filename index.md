@@ -31,7 +31,10 @@
   The cmd shows "Scanned: XXXX/SimObjects/~" just before the error.  
   Delete the folder with the same name as that XXXX from the Community.  
   I'm unable to assist you in this matter.   
-  If this does not resolve the issue, delete all 788 liveries from Community. (Note that I do not support Third-Party liveries.)  
+  If this does not resolve the issue, delete all 788 liveries from Community. (Note that I do not support Third-Party liveries.)
+    
+  (So, for example, in the below SS case, it is the "Community/Kuro_B787-8_TESTING" folder that needs to be deleted.)
+  ![image](https://media.discordapp.net/attachments/746019679163777109/1125332463070232596/image.png?width=968&height=701)
 
 </details>
 <details><summary><strong>Simbrief Profile?</strong></summary></big>
