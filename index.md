@@ -1,5 +1,5 @@
 # FAQ
-##### Last Updated On : July 2, 2023
+##### Last Updated On : July 3, 2023
 ###### For v2.0.0~
 
 
@@ -23,10 +23,29 @@
 
 </details>
 
+<details><summary><strong>The Installer show errors during converting liveries</strong></summary>
+
+- Some liveries are incompatible at all, so you'll have to remove them.
+  
+  How to find incompatible liveries. (v2.0.0 Installer):  
+  The cmd shows "Scanned: XXXX/SimObjects/~" just before the error.  
+  Delete the folder with the same name as that XXXX from the Community.  
+  I'm unable to assist you in this matter.   
+  If this does not resolve the issue, delete all 788 liveries from Community. (Note that I do not support Third-Party liveries.)  
+
+</details>
 <details><summary><strong>Simbrief Profile?</strong></summary></big>
   
 - [SimBrief Profile
 (GENX-1B64/TRENT1000-H2)](https://dispatch.simbrief.com/airframes/share/eyJiYXNldHlwZSI6IkI3ODgiLCJpY2FvIjoiQjc4OCIsInJlZyI6IkpBNzhLUiIsImZpbiI6IjExMjMiLCJzZWxjYWwiOiJXVEtSIiwiaGV4Y29kZSI6IiIsIm5hbWUiOiJCNzg3LTgiLCJlbmdpbmVzIjoiIiwiY29tbWVudHMiOiJLUkI3ODggdjIsIEdFTlgtMUI2NC9UUkVOVDEwMDAtSDIiLCJwbGFudW5pdHMiOiIwIiwicGVyIjoiRCIsImNhdCI6IkgiLCJlcXVpcCI6IlNERTFFMkUzRkdISUoySjNKNEo1TTFSV1hZWiIsInRyYW5zcG9uZGVyIjoiTEIxRDEiLCJwYm4iOiJBMUIxQzFEMUwxTzFTMiIsImV0b3BzcmFuZ2UiOiIiLCJleHRyYXJtayI6IiIsIndndHVuaXRzIjoiS0dTIiwibWF4cGF4IjoiMjQwIiwicGF4d2d0IjoiNzkiLCJiYWd3Z3QiOiIyNSIsIm9ldyI6IjExOTk3NSIsIm16ZnciOiIxNjEwMjUiLCJtdG93IjoiMjI3OTMwIiwibWx3IjoiMTcyMzY1IiwibWF4ZnVlbCI6IjEwMTMyMyIsIm1heGNhcmdvIjoiIiwiY2FyZ29tb2RlIjoiIiwiZGVmYXVsdGNpIjoiIiwiZnVlbGZhY3RvciI6IlAwMCIsImNlaWxpbmciOiI0MzEwMCIsImNydWlzZW9mZnNldCI6IlAwMDAwIn0-)
+
+</details>
+
+<details><summary><strong>IRS/Battery does not activate.</strong></summary>
+
+- set lower Graphic setting for performance or press and hold the button little longer.
+- (**Some reports say it’s due to incompatible livery, so try my ANA(saba) one to check if it works first.)
+
 
 </details>
 
@@ -36,7 +55,7 @@
 
 </details>
 
-<details><summary><strong>No EFB?</strong></summary>
+<details><summary><strong>No EFB/Simbrief injections?</strong></summary>
 
 - Not yet.
 At the earliest, after WT implemented it on the B787-10.
