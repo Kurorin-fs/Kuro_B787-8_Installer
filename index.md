@@ -6,14 +6,21 @@
 #
 <details><summary><strong>How to install this?</strong></summary>
 
-- double click and run Kuro_B787-8_Installer.bat and follow the instructions.  
-- Use [7-Zip](https://www.7-zip.org) to unpack Installer.zip, WinRAR often cause file errors.  
+- double click and run Kuro_B787-8_Installer.bat and follow the instructions.
   
   <strong>Required Contents :</strong>
  - MSFS Premium Delux Version (B787-10)  
  - ~~HeavyDivision's B78XH(any version)~~ ; is no longer required since v2.0.0. And <strong>if you have used Stable/DEV version, it should be removed.</strong>
 
 </details>
+
+<details><summary><strong>File not found error/No windows are shown</strong></summary>
+   
+- Use [7-Zip](https://www.7-zip.org) to unpack downloaded zip file. (not WinRAR, it often cause file errors.)  
+- Disable Anti-Virus software temporary.
+
+</details>
+
 
 <details><summary><strong>The Installer Freezes</strong></summary>
 
