@@ -96,8 +96,9 @@ At the earliest, after WT implemented it on the B787-10.
 </details>
 
 <details><summary><strong>I want to use FTSim+ Sound Pack</strong></summary>
-
-- Patch it from the Installer.
+  
+- You can install it from the Installer.
+  (Settings>check “USE GE(RR) Soundpack>Select>Select xml of Sp>Close>”Update Kuro_B787-8”
 </details>
 
 <details><summary><strong>Some Sounds are missing</strong></summary>
