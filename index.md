@@ -54,9 +54,10 @@
 
 <details><summary><strong>IRS/Battery does not activate.</strong></summary>
   
-- is because of conflict with Newlight Mod
+- is because of interference from older Light Mod (e.g.:NewLight mod)
   
-  Fix: Remove following folders from Community   
+  Fix: Remove light mods from Community  
+  If you’ve been using Newlight, Remove:  
   z-Newlight-settinglight-AS-B787-10  
   z-Newlight-settinglight-Kuro_B787_8  
 
