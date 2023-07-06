@@ -1,5 +1,5 @@
 # FAQ
-##### Last Updated On : July 4, 2023
+##### Last Updated On : July 6, 2023
 ###### For v2.0.0~
 
 
