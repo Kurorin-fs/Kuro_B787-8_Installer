@@ -53,9 +53,12 @@
 </details>
 
 <details><summary><strong>IRS/Battery does not activate.</strong></summary>
-
-- set lower Graphic setting for performance or press and hold the button little longer.
-- (**Some reports say it’s due to incompatible livery, so try my ANA(saba) one to check if it works first.)
+  
+- is because of conflict with Newlight Mod
+  
+  Fix: Remove following folders from Community   
+  z-Newlight-settinglight-AS-B787-10  
+  z-Newlight-settinglight-Kuro_B787_8  
 
 
 </details>
