@@ -1,5 +1,5 @@
 # FAQ
-##### Last Updated On : July 6, 2023
+##### Last Updated On : July 8, 2023
 ###### For v2.0.0~
 
 
@@ -10,7 +10,7 @@
   
   <strong>Required Contents :</strong>
  - MSFS Premium Delux Version (B787-10)  
- - ~~HeavyDivision's B78XH(any version)~~ ; is no longer required since v2.0.0. And <strong>if you have used Stable/DEV version, it should be removed.</strong>
+   >~~HeavyDivision's B78XH(any version)~~ ; is no longer required since v2.0.0. And <strong>if you have used Stable/DEV version, it should be removed.</strong>
 
 </details>
 
@@ -35,14 +35,14 @@
 
 - Some liveries are incompatible at all, so you'll have to remove them.
   
-  How to find incompatible liveries. (v2.0.0 Installer):  
-  The cmd shows "Scanned: XXXX/SimObjects/~" just before the error.  
-  Delete the folder with the same name as that XXXX from the Community.  
-  I'm unable to assist you in this matter.   
-  If this does not resolve the issue, delete all 788 liveries from Community. (Note that I do not support Third-Party liveries.)
+  >How to find incompatible liveries. (v2.0.0 Installer):  
+  >The cmd shows "Scanned: XXXX/SimObjects/~" just before the error.  
+  >Delete the folder with the same name as that XXXX from the Community.  
+  >I'm unable to assist you in this matter.   
+  >If this does not resolve the issue, delete all 788 liveries from Community. (Note that I do not support Third-Party liveries.)
     
-  (So, for example, in the below SS case, it is the "Community/Kuro_B787-8_TESTING" folder that needs to be deleted.)
-  ![image](https://media.discordapp.net/attachments/746019679163777109/1125332463070232596/image.png?width=968&height=701)
+  >(So, for example, in the below SS case, it is the "Community/Kuro_B787-8_TESTING" folder that needs to be deleted.)
+  >![image](https://media.discordapp.net/attachments/746019679163777109/1125332463070232596/image.png?width=968&height=701)
 
 </details>
 <details><summary><strong>Simbrief Profile?</strong></summary></big>
@@ -57,9 +57,9 @@
 - is because of interference from older Light Mod (e.g.:NewLight mod)
   
   Fix: Remove light mods from Community  
-  If you’ve been using Newlight, Remove:  
-  z-Newlight-settinglight-AS-B787-10  
-  z-Newlight-settinglight-Kuro_B787_8  
+  >If you’ve been using Newlight, Remove:  
+  >z-Newlight-settinglight-AS-B787-10  
+  >z-Newlight-settinglight-Kuro_B787_8  
 
 
 </details>
@@ -94,15 +94,22 @@ At the earliest, after WT implemented it on the B787-10.
 - (First of all, have you installed MSFS B787-10?)
 - Delete HeavyDivision’s B78XH mod
 - Convert liveries from the installer.  
-(Btw, Third party Liveries are not supported by me.)
+  >(Keep in mind that third party Liveries are not supported by me.)
 - Update B787-10 from Content Manager
 
 </details>
 
-<details><summary><strong>I want to use FTSim+ Sound Pack</strong></summary>
+<details><summary><strong>How to install FTSim+ Sound Pack</strong></summary>
   
-- You can install it from the Installer.
-  (Settings>check “USE GE(RR) Soundpack>Select>Select xml of Sp>Close>”Update Kuro_B787-8”
+- Install it from the Installer.
+  
+  Settings>check “USE GE(RR) Soundpack”>Select>  
+  (Select xml file of Sp which you’ve downloaded and extracted.)>
+  >Make sure **.PC.PCK is on the same folder as specified xml at this time
+
+  Close>”Update Kuro_B787-8”  
+
+  >(Google “MSFS 787 Soundpack” to find FTSim’s awesome soundpacks)  
 </details>
 
 <details><summary><strong>Some Sounds are missing</strong></summary>
@@ -110,12 +117,13 @@ At the earliest, after WT implemented it on the B787-10.
 - All Soundpacks released before AAU2 Update(1.33.8.0,  Date: June 23th, 2023) are no longer compatible.
 (So if you’re FTSim user, you need to update Soundpacks to v1.47(v1.49?) or later)
 - Disable Custom SoundPack in the Installer and reinstall B787-8
-- (Btw, Third party Soundpacks are bot supported by me.)
+  >(Keep in mind that third party Soundpacks are bot supported by me.)
 </details>
 
 <details><summary><strong>Liveries are broken</strong></summary>
 
-- Converting liveries from the installer would help you - (Btw, Third party Liveries are not supported by me.)
+- Converting liveries from the installer would help you
+  >(Keep in mind that third party Liveries are not  supported by me.)
 
 </details>
 
