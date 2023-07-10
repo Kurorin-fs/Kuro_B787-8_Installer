@@ -54,9 +54,9 @@
 
 <details><summary><strong>IRS/Battery does not activate.</strong></summary>
   
-- is because of interference from older Light Mod (e.g.:NewLight mod)
+- is because of interference from outdated Light/Improvement Mod (e.g.:NewLight mod)
   
-  Fix: Remove light mods from Community  
+  Fix: Remove mods for B787-8 from Community  
   >If you’ve been using Newlight, Remove:  
   >z-Newlight-settinglight-AS-B787-10  
   >z-Newlight-settinglight-Kuro_B787_8  
@@ -96,6 +96,11 @@ At the earliest, after WT implemented it on the B787-10.
 - Convert liveries from the installer.  
   >(Keep in mind that third party Liveries are not supported by me.)
 - Update B787-10 from Content Manager
+- maybe because of interference from outdated Light/Improvement Mod (e.g.:NewLight mod)  
+  Fix: Remove mods for B787-8 from Community  
+  >If you’ve been using Newlight, Remove:  
+  >z-Newlight-settinglight-AS-B787-10  
+  >z-Newlight-settinglight-Kuro_B787_8 
 
 </details>
 
