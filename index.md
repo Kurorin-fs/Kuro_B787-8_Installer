@@ -134,7 +134,8 @@ At the earliest, after WT implemented it on the B787-10.
 
 <details><summary><strong>Everything shows pink</strong></summary>
 
-- Update B787-10 from Content Manager / Stop using pirated contents.
+- Update B787-10 from Content Manager
+- Stop using pirated contents.  
 - <strong>Required Contents :</strong>
    - MSFS Premium Delux Version (B787-10)
 
