@@ -136,8 +136,8 @@ At the earliest, after WT implemented it on the B787-10.
 
 - Update B787-10 from Content Manager
 - Stop using pirated contents.  
-- <strong>Required Contents :</strong>
-   - MSFS Premium Delux Version (B787-10)
+- <strong>Required Contents :
+   - MSFS Premium Delux Version (B787-10)</strong>
 
 </details>
 
