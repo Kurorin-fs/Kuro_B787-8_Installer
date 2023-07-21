@@ -1,9 +1,36 @@
 # Changelogs
-##### Last Updated On : July 10, 2023
-###### v2.0.0
+##### Last Updated On : July 21, 2023
+###### v2.1.0
 
 
 #
+<details><summary><strong>v2.1.0</strong></summary>
+  
+  - [INT] New cockpit texture fonts
+  - [INT] New MCP fonts
+  - [FX/INT] New interior lights
+  - [FX/EXT] Beacon light improvements
+  - [SYS] Set max ceiling altitude to FL430
+  - [FM] Wing flex fix integration
+  - [FM] Bounce fix
+  - [FM] Gear Compression fix
+  - [FM/EXT] Steering fix
+  - [UI] Add Checklists
+  - [FM] Fix Pitches from an External View
+  - [FM] Fix Cruising with a negative pitch
+  - [FM] Reworked flaps and slats configuration
+  - [FM] Flight model dimensions & position update
+  - [FM] Reworked aircraft data based on simulation software
+  - [FM] Reworked default payload stations based on BAW cabin layout
+  - [SYS] Adjust RA on the ground
+  - [INT] New cockpit texture decals
+  - [FM] Flight Director overshoot on turn fix
+  - [UI] Add a tool to export Community folder lists to the Installer for easier support
+  - [UI] Add changelog link to the Installer
+  - [INT/EXT] minor texture & model bug fixes
+
+</details>
+
 <details><summary><strong>v2.0.0</strong></summary>
   
   - [SYS/FM] Accurate -8 FMC Calculation/Trim Settings/Flight models based on FCOM and Real References  
