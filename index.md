@@ -4,6 +4,17 @@
 
 
 #
+<details><summary><strong>Where can I get support</strong></summary>
+  
+- Read following FAQ before contact support.
+  >It solves 99% of the problem.
+- Support requests should be directed to the HorizonSim discord.
+  - Link: https://discord.gg/Peyby68DTs
+  - You may be asked to submit "logger.log" file for support.
+    - Installer>Tools>Write log for Support
+</details>
+
+
 <details><summary><strong>How to install this?</strong></summary>
 
 - double click and run Kuro_B787-8_Installer.bat and follow the instructions.
@@ -48,7 +59,7 @@
 <details><summary><strong>Simbrief Profile?</strong></summary></big>
   
 - [SimBrief Profile
-(GENX-1B64/TRENT1000-H2)](https://dispatch.simbrief.com/airframes/share/eyJiYXNldHlwZSI6IkI3ODgiLCJpY2FvIjoiQjc4OCIsInJlZyI6IkpBNzhLUiIsImZpbiI6IjExMjMiLCJzZWxjYWwiOiJXVEtSIiwiaGV4Y29kZSI6IiIsIm5hbWUiOiJCNzg3LTgiLCJlbmdpbmVzIjoiIiwiY29tbWVudHMiOiJLUkI3ODggdjIsIEdFTlgtMUI2NC9UUkVOVDEwMDAtSDIiLCJwbGFudW5pdHMiOiIwIiwicGVyIjoiRCIsImNhdCI6IkgiLCJlcXVpcCI6IlNERTFFMkUzRkdISUoySjNKNEo1TTFSV1hZWiIsInRyYW5zcG9uZGVyIjoiTEIxRDEiLCJwYm4iOiJBMUIxQzFEMUwxTzFTMiIsImV0b3BzcmFuZ2UiOiIiLCJleHRyYXJtayI6IiIsIndndHVuaXRzIjoiS0dTIiwibWF4cGF4IjoiMjQwIiwicGF4d2d0IjoiNzkiLCJiYWd3Z3QiOiIyNSIsIm9ldyI6IjExOTk3NSIsIm16ZnciOiIxNjEwMjUiLCJtdG93IjoiMjI3OTMwIiwibWx3IjoiMTcyMzY1IiwibWF4ZnVlbCI6IjEwMTMyMyIsIm1heGNhcmdvIjoiIiwiY2FyZ29tb2RlIjoiIiwiZGVmYXVsdGNpIjoiIiwiZnVlbGZhY3RvciI6IlAwMCIsImNlaWxpbmciOiI0MzEwMCIsImNydWlzZW9mZnNldCI6IlAwMDAwIn0-)
+(GENX-1B64/TRENT1000-H2)](https://dispatch.simbrief.com/airframes/share/eyJiYXNldHlwZSI6IkI3ODgiLCJpY2FvIjoiQjc4OCIsInJlZyI6IkpBNzhLUiIsImZpbiI6IjExMjMiLCJzZWxjYWwiOiJLUldUIiwiaGV4Y29kZSI6IiIsIm5hbWUiOiJCNzg3LTgiLCJlbmdpbmVzIjoiIiwiY29tbWVudHMiOiJLUkI3ODggdjIuMS4wLCBHRU5YLTFCNjQvVFJFTlQxMDAwLUgyIiwicGxhbnVuaXRzIjoiMCIsInBlciI6IkQiLCJjYXQiOiJIIiwiZXF1aXAiOiJTREUxRTJFM0ZHSElKMkozSjRKNU0xUldYWVoiLCJ0cmFuc3BvbmRlciI6IkxCMUQxIiwicGJuIjoiQTFCMUMxRDFMMU8xUzIiLCJldG9wc3JhbmdlIjoiIiwiZXh0cmFybWsiOiIiLCJ3Z3R1bml0cyI6IktHUyIsIm1heHBheCI6IjIyNSIsInBheHdndCI6Ijg0IiwiYmFnd2d0IjoiMzEiLCJvZXciOiIxMTk5NzUiLCJtemZ3IjoiMTYxMDI1IiwibXRvdyI6IjIyNzkzMCIsIm1sdyI6IjE3MjM2NSIsIm1heGZ1ZWwiOiIxMDE0NTYiLCJtYXhjYXJnbyI6IjIyMDg3IiwiY2FyZ29tb2RlIjoiIiwiZGVmYXVsdGNpIjoiMjUiLCJmdWVsZmFjdG9yIjoiUDAwIiwiY2VpbGluZyI6IjQzMTAwIiwiY3J1aXNlb2Zmc2V0IjoiUDAwMDAifQ--)
 
 </details>
 
@@ -86,6 +97,13 @@ At the earliest, after WT implemented it on the B787-10.
 <details><summary><strong>Cockpit lights not working</strong></summary>
 
 - Remove all light mods from your Community folder.
+
+</details>
+
+<details><summary><strong>Steering wheel looks wrong.</strong></summary>
+
+- Ask the original livery creator to update their model.
+  >(Keep in mind that third party Liveries are not supported by me.)
 
 </details>
 
@@ -128,7 +146,7 @@ At the earliest, after WT implemented it on the B787-10.
 <details><summary><strong>Liveries are broken</strong></summary>
 
 - Converting liveries from the installer would help you
-  >(Keep in mind that third party Liveries are not  supported by me.)
+  >(Keep in mind that third party Liveries are not supported by me.)
 
 </details>
 
