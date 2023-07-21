@@ -1,9 +1,15 @@
 # Changelogs
 ##### Last Updated On : July 21, 2023
-###### v2.1.0
+###### v2.1.1
 
 
 #
+<details><summary><strong>v2.1.1</strong></summary>
+  
+  - [EXT] Duplicated Center Wheels fix (from v2.1.0)
+
+</details>
+
 <details><summary><strong>v2.1.0</strong></summary>
   
   - [INT] New cockpit texture fonts
