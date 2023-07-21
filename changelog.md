@@ -15,6 +15,7 @@
   - [FM] Bounce fix
   - [FM] Gear Compression fix
   - [FM/EXT] Steering fix
+  - [SYS] Add GSX Profile
   - [UI] Add Checklists
   - [FM] Fix Pitches from an External View
   - [FM] Fix Cruising with a negative pitch
