@@ -24,7 +24,7 @@ def remove_readonly(func, path, excinfo):
     func(path)
 
 
-version = "v2.1.0"
+version = "v2.1.1"
 faq_url = "https://github.com/Kurorin-fs/Kuro_B787-8_Installer/blob/main/index.md"
 fsto_url = "https://flightsim.to/file/45062/boeing-787-8"
 chglog_url= "https://github.com/Kurorin-fs/Kuro_B787-8_Installer/blob/main/changelog.md"
