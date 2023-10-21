@@ -174,4 +174,4 @@ https://flightsim.to/profile/Kurorin
 Some credits goes to Microsoft, ASOBO Studios.
 Flight Simulator 2020 © Microsoft Corporation.
 "Kuro_B787-8 | B787-8 Dreamliner" was created under Microsoft's "Game Content Usage Rules" using assets from Microsoft Flight Simulator 2020 and it's not endorsed by or affiliated with Microsoft.
-Microsoft's Rules: https://www.xbox.com/en-US/developers/rule
+Microsoft's Rules: https://www.xbox.com/en-US/developers/rules
