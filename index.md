@@ -104,9 +104,8 @@
 <details><summary><strong>Some Sounds are missing</strong></summary>
 
 - All Soundpacks released before AAU2 Update(1.33.8.0,  Date: June 23th, 2023) are no longer compatible.
-(So if you’re FTSim user, you need to update Soundpacks to v1.47(v1.49?) or later)
-- Disable Custom SoundPack in the Installer and reinstall B787-8
-  >(Keep in mind that third party Soundpacks are bot supported by me.)
+(So if you’re FTSim user, you need to update Soundpacks to v1.47(v1.49?) or late
+  >(Keep in mind that third party Soundpacks are bot supported by me.)r)
 </details>
 
 <details><summary><strong>Liveries are broken</strong></summary>
