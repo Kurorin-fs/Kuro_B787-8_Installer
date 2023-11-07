@@ -1,6 +1,6 @@
 # FAQ
-##### Last Updated On : July 21, 2023
-###### For v2.1.0~
+##### Last Updated On : November 07, 2023
+###### For v3.0.0~
 
 
 #
@@ -10,14 +10,14 @@
   >It solves 99% of the problem.
 - Support requests should be directed to the HorizonSim discord.
   - Link: https://discord.gg/Peyby68DTs
-  - You may be asked to submit "logger.log" file for support.
-    - Installer>Tools>Write log for Support
 </details>
 
 
 <details><summary><strong>How to install this?</strong></summary>
 
-- double click and run Kuro_B787-8_Installer.bat and follow the instructions.
+- extract Kuro_B787-8.***.zip and drag and drop Kuro_B787-8 folder to your MSFS Community folder.
+   >- Recommend to Use [7-Zip](https://www.7-zip.org) to extract downloaded zip file. (not WinRAR, it often cause file errors.)  
+
   
   <strong>Required Contents :</strong>
  - MSFS Premium Delux Version (B787-10)  
@@ -25,41 +25,13 @@
 
 </details>
 
-<details><summary><strong>File not found error/No windows are shown</strong></summary>
-   
-- Use [7-Zip](https://www.7-zip.org) to unpack downloaded zip file. (not WinRAR, it often cause file errors.)  
-- Disable Anti-Virus software temporary.
-
-</details>
-
-
-<details><summary><strong>The Installer Freezes</strong></summary>
-
-- Wait until the next window appears. Although the process may appear inactive at times, it is still running.    
-
-- Don't click/touch Command Prompt Window  
-- Disable QuickEdit Command Prompt Window ([Click here to see how](https://i.stack.imgur.com/GGPXR.gif))  
-
-</details>
-
-<details><summary><strong>The Installer shows errors during converting liveries</strong></summary>
-
-- Some liveries are incompatible at all, so you'll have to remove them.
-  
-  >How to find incompatible liveries. (v2.0.0 Installer):  
-  >The cmd shows "Scanned: XXXX/SimObjects/~" just before the error.  
-  >Delete the folder with the same name as that XXXX from the Community.  
-  >I'm unable to assist you in this matter.   
-  >If this does not resolve the issue, delete all 788 liveries from Community. (Note that I do not support Third-Party liveries.)
-    
-  >(So, for example, in the below SS case, it is the "Community/Kuro_B787-8_TESTING" folder that needs to be deleted.)
-  >![image](https://media.discordapp.net/attachments/746019679163777109/1125332463070232596/image.png?width=968&height=701)
-
-</details>
 <details><summary><strong>Simbrief Profile?</strong></summary></big>
-  
+ 
 - [SimBrief Profile
-(GENX-1B64/TRENT1000-H2)](https://dispatch.simbrief.com/airframes/share/eyJiYXNldHlwZSI6IkI3ODgiLCJpY2FvIjoiQjc4OCIsInJlZyI6IkctWkJKSCIsImZpbiI6IjExMjMiLCJzZWxjYWwiOiJLUldUIiwiaGV4Y29kZSI6IiIsIm5hbWUiOiJCNzg3LTgiLCJlbmdpbmVzIjoiIiwiY29tbWVudHMiOiJLUkI3ODggdjIuMS4wLCBCQVcgTGF5b3V0LCBHRU5YLTFCNjQvVFJFTlQxMDAwLUgyIiwicGxhbnVuaXRzIjoiMCIsInBlciI6IkQiLCJjYXQiOiJIIiwiZXF1aXAiOiJTREUxRTJFM0ZHSElKMkozSjRKNU0xUldYWVoiLCJ0cmFuc3BvbmRlciI6IkxCMUQxIiwicGJuIjoiQTFCMUMxRDFMMU8xUzIiLCJldG9wc3JhbmdlIjoiIiwiZXh0cmFybWsiOiIiLCJ3Z3R1bml0cyI6IktHUyIsIm1heHBheCI6IjIyNSIsInBheHdndCI6Ijg0IiwiYmFnd2d0IjoiMzEiLCJvZXciOiIxMTk5NzUiLCJtemZ3IjoiMTYxMDI1IiwibXRvdyI6IjIyNzkzMCIsIm1sdyI6IjE3MjM2NSIsIm1heGZ1ZWwiOiIxMDE0NTYiLCJtYXhjYXJnbyI6IjIyMDg3IiwiY2FyZ29tb2RlIjoiIiwiZGVmYXVsdGNpIjoiMjUiLCJmdWVsZmFjdG9yIjoiUDAwIiwiY2VpbGluZyI6IjQzMTAwIiwiY3J1aXNlb2Zmc2V0IjoiUDAwMDAifQ--)
+(GENX-1B64/TRENT1000-H2)](https://dispatch.simbrief.com/airframes/share/337573_1689936264695)
+- is the same as that shown in the simbrief by default.↓
+  
+![image](https://media.discordapp.net/attachments/746019679163777109/1171439564754259978/image.png?ex=655caf1c&is=654a3a1c&hm=2eece7a5c4e49c8e9c510da2a90fdd2b91a820f71907e045a078d0d8950c4dad&=)
 
 </details>
 
@@ -75,6 +47,15 @@
 
 </details>
 
+<details><summary><strong>How to install FTSim+ Sound Pack</strong></summary>
+  
+- Follow official FTSim+ instruction(INFO.pdf). (or ask FTSim)
+  >- B787Genx_Sp (FS2020) v1.17 For Kuro v2 Package
+  >- B787RR_Sp (FS2020) v1.49b For Kuro v2 Package
+
+>(Google “MSFS 787 Soundpack” to find FTSim’s awesome soundpacks)  
+</details>
+
 <details><summary><strong>No Cabin interior?</strong></summary></big>
   
 - No.
@@ -83,8 +64,7 @@
 
 <details><summary><strong>No EFB/Simbrief injections?</strong></summary>
 
-- Not yet.
-At the earliest, after WT implemented it on the B787-10.
+- Update to v3.0.0+
 
 </details>
 
@@ -111,8 +91,6 @@ At the earliest, after WT implemented it on the B787-10.
 
 - (First of all, have you installed MSFS B787-10?)
 - Delete HeavyDivision’s B78XH mod
-- Convert liveries from the installer.  
-  >(Keep in mind that third party Liveries are not supported by me.)
 - Update B787-10 from Content Manager
 - maybe because of interference from outdated Light/Improvement Mod (e.g.:NewLight mod)  
   Fix: Remove mods for B787-8 from Community  
@@ -122,18 +100,6 @@ At the earliest, after WT implemented it on the B787-10.
 
 </details>
 
-<details><summary><strong>How to install FTSim+ Sound Pack</strong></summary>
-  
-- Install it from the Installer.
-  
-  Settings>check “USE GE(RR) Soundpack”>Select>  
-  (Select xml file of Sp which you’ve downloaded and extracted.)>
-  >Make sure **.PC.PCK is on the same folder as specified xml at this time
-
-  Close>”Update Kuro_B787-8”  
-
-  >(Google “MSFS 787 Soundpack” to find FTSim’s awesome soundpacks)  
-</details>
 
 <details><summary><strong>Some Sounds are missing</strong></summary>
 
@@ -145,7 +111,7 @@ At the earliest, after WT implemented it on the B787-10.
 
 <details><summary><strong>Liveries are broken</strong></summary>
 
-- Converting liveries from the installer would help you
+- Ask the original livery creator.
   >(Keep in mind that third party Liveries are not supported by me.)
 
 </details>
