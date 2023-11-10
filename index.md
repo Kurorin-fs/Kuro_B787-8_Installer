@@ -28,7 +28,7 @@
 <details><summary><strong>Simbrief Profile?</strong></summary></big>
  
 - [SimBrief Profile
-(GENX-1B64/TRENT1000-H2)](https://dispatch.simbrief.com/airframes/share/337573_1689936264695)
+(GENX-1B64/TRENT1000-H2) v3.0.0~](https://dispatch.simbrief.com/airframes/share/337573_1689936264695)
 - is the same as that shown in the simbrief by default.↓
   
 ![image](https://media.discordapp.net/attachments/746019679163777109/1171439564754259978/image.png?ex=655caf1c&is=654a3a1c&hm=2eece7a5c4e49c8e9c510da2a90fdd2b91a820f71907e045a078d0d8950c4dad&=)
@@ -53,7 +53,7 @@
   >- B787Genx_Sp (FS2020) v1.17 For Kuro v2 Package
   >- B787RR_Sp (FS2020) v1.49b For Kuro v2 Package
 
->(Google “MSFS 787 Soundpack” to find FTSim’s awesome soundpacks)  
+>(Google “MSFS 787 Soundpack” to find soundpacks made by FTSim)  
 </details>
 
 <details><summary><strong>No Cabin interior?</strong></summary></big>
