@@ -1,9 +1,27 @@
 # Changelogs
-##### Last Updated On : July 21, 2023
-###### v2.1.1
+##### Last Updated On :  November 23, 2023
+###### v3.0.0
 
 
 #
+<details><summary><strong>v3.0.0</strong></summary>
+  
+  - [SYS] WT0.1.18(SU13/14beta) Systems
+  - [FM] Updated Flight Model
+  - [EXT] Toggleable SatCom
+  - [EXT] New Wingflex
+  - [INT] New PFD, CDU and MFD colours
+  - [SYS] EFB Door Page
+  - [EXT] New PBR Textures
+  - [SYS] PFD - VBar
+  - [INT] New Camera positions
+  - [FX/INT] New cockpit lights
+  - [UI] Initial Loading Tip
+  - [FM/SYS] Fuel Scalar, ETA Fuel and TSFC
+  - [SYS] Fixed OPT being higher than MAX
+
+</details>
+
 <details><summary><strong>v2.1.1</strong></summary>
   
   - [EXT] Duplicated Center Wheels fix (from v2.1.0)
