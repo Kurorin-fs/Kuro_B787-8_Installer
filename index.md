@@ -1,5 +1,5 @@
 # FAQ
-##### Last Updated On : November 07, 2023
+##### Last Updated On : November 27, 2023
 ###### For v3.0.0~
 
 
@@ -7,7 +7,7 @@
 <details><summary><strong>Where can I get support</strong></summary>
   
 - Read following FAQ before contact support.
-  >It solves 99% of the problem.
+  >It solves 99% of problems.
 - Support requests should be directed to the HorizonSim discord.
   - Link: https://discord.gg/Peyby68DTs
 </details>
@@ -115,7 +115,7 @@
 
 </details>
 
-<details><summary><strong>Everything shows pink</strong></summary>
+<details><summary><strong>Everything shows pink / transparent</strong></summary>
 
 - Update B787-10 from Content Manager
 - Stop using pirated contents.  
