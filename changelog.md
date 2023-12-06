@@ -8,8 +8,8 @@
   
   - [SYS] WT0.2.4 Systems(SU14)
   - [FM] Adjusted Climb Performance
+  - [FM/SYS] Adjusted Fuel Consumption / ETA Fuel
   - [EXT] Adjusted Wingflex
-  - [SYS] Adjusted ETA Fuel (Fixed Insufficient Fuel)
   - [FM] Adjusted Spoilers/Flaps Performances
 
 </details>
