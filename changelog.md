@@ -1,9 +1,19 @@
 # Changelogs
-##### Last Updated On :  November 23, 2023
-###### v3.0.0
+##### Last Updated On :  December 06, 2023
+###### v3.0.1
 
 
 #
+<details><summary><strong>v3.0.1</strong></summary>
+  
+  - [SYS] WT0.2.4 Systems(SU14)
+  - [FM] Adjusted Climb Performance
+  - [EXT] Adjusted Wingflex
+  - [SYS] Adjusted ETA Fuel (Fixed Insufficient Fuel)
+  - [FM] Adjusted Spoilers/Flaps Performances
+
+</details>
+
 <details><summary><strong>v3.0.0</strong></summary>
   
   - [SYS] WT0.1.18(SU13/14beta) Systems
